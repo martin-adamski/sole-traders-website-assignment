@@ -1,0 +1,29 @@
+<%- include('partials/header') %>
+
+<a href="/directory">&larr; Back to Directory</a>
+
+<h1><%= trader.name %></h1>
+<p><strong><%= trader.trade_type %></strong> in <%= trader.region %></p>
+
+<p><%= trader.bio %></p>
+
+<hr>
+
+<h2>Services</h2>
+
+<% if (services.length === 0) { %>
+    <p>No services listed.</p>
+<% } else { %>
+    <ul>
+        <% services.forEach(service => { %>
+            <li>
+                <h3><%= service.title %> (£<%= service.price %>)</h3>
+                <p><%= service.description %></p>
+                <a href="/services/<%= service.id %>/book">Book this service</a>
+            </li>
+            <br>
+        <% }); %>
+    </ul>
+<% } %>
+
+<%- include('partials/footer') %>

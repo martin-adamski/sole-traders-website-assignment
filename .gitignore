@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Secrets
+.env
+.env.*
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build/Dist
+dist/
+build/
+
+# OS/IDE
+.DS_Store
+.vscode/

@@ -1,0 +1,42 @@
+<%- include('partials/header') %>
+
+<h1>Request Booking</h1>
+<h2><%= service.title %> with <%= trader.name %></h2>
+<p>Price: £<%= service.price %></p>
+
+<hr>
+
+<form action="/services/<%= service.id %>/book" method="POST">
+    <input type="hidden" name="trader_id" value="<%= trader.id %>">
+    
+    <p>
+        <label>Your Name:</label><br>
+        <input type="text" name="client_name" required>
+    </p>
+
+    <p>
+        <label>Your Email:</label><br>
+        <input type="email" name="client_email" required>
+    </p>
+    
+    <p>
+        <label>Date:</label><br>
+        <input type="date" name="job_date" required>
+    </p>
+    
+    <p>
+        <label>Start Time:</label><br>
+        <input type="time" name="job_start_time" required>
+    </p>
+    
+    <p>
+        <label>Notes:</label><br>
+        <textarea name="job_description" rows="5" required></textarea>
+    </p>
+
+    <button type="submit">Confirm Booking</button> 
+    or <a href="/traders/<%= trader.id %>">Cancel</a>
+
+</form>
+
+<%- include('partials/footer') %>

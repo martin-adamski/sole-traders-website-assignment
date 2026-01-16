@@ -1,0 +1,20 @@
+<%- include('partials/header') %>
+
+<h1><%= title %></h1>
+<p><%= traders.length %> active traders</p>
+
+<% if (traders.length === 0) { %>
+    <p>No traders found.</p>
+<% } else { %>
+    <ul>
+        <% traders.forEach(trader => { %>
+            <li>
+                <h3><a href="/traders/<%= trader.id %>"><%= trader.name %></a></h3>
+                <p><%= trader.trade_type %> in <%= trader.region %></p>
+            </li>
+            <br>
+        <% }); %>
+    </ul>
+<% } %>
+
+<%- include('partials/footer') %>
