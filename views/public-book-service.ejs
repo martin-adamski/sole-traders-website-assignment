@@ -10,6 +10,12 @@
     <input type="hidden" name="trader_id" value="<%= trader.id %>">
     <input type="hidden" name="client_user_id" value="<%= user.id %>">
     
+    <% if (locals.successfulMessage) { %>
+        <p id="success-msg" class="help is-success" style="font-weight: bold; margin-bottom: 10px;">
+            <%= successfulMessage %>
+        </p>
+    <% } %>
+
     <p>
         <label>Your Name:</label><br>
         <input type="text" name="client_name" value="<%= user.full_name %>" required>

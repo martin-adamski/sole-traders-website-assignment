@@ -101,8 +101,8 @@ exports.createBooking = async (req, res) => {
 
         const serviceId = req.params.id;
 
-        let {trader_id, client_user_id, client_name, client_email, job_date, job_start_time, job_description} = req.body;
-        // reconverting to null 
+        let {client_user_id, client_name, client_email, job_date, job_start_time, job_description} = req.body;
+        // converting to null again
         client_user_id = client_user_id === '' ? null : client_user_id;
 
         const query = `
@@ -113,7 +113,9 @@ exports.createBooking = async (req, res) => {
 
         await db.query(query, [serviceId, client_user_id, client_name, client_email, job_date, job_start_time, job_description]);
 
-        res.redirect(`/traders/${trader_id}`);
+        res.locals.successfulMessage = 'Successful Booking.';
+
+        return exports.getBookingPage(req, res);
 
     } catch (err) {
         console.error(err);
