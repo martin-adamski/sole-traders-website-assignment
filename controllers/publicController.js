@@ -1,11 +1,11 @@
 const db = require('../config/dbconnection');
 
-// Controller function to get home page
+// Get home page
 exports.getHomePage = (req, res) => {
     res.render('index', { title: 'SoleTraders.co.uk' });
 };
 
-// Controller function to get all traders
+// Get all traders
 exports.getAllTraders = async (req, res) => {
     try {
         const [traders] = await db.query('SELECT tp.*, u.full_name FROM trader_profiles tp LEFT JOIN users u ON tp.user_id = u.id');
@@ -21,7 +21,7 @@ exports.getAllTraders = async (req, res) => {
     }
 };
 
-// Controller function to get trader profile
+// Get trader profile
 exports.getTraderProfile = async (req, res) => {
     
     try {
@@ -57,10 +57,14 @@ exports.getTraderProfile = async (req, res) => {
 
 };
 
-// Controller function to get booking page
+// Get booking page
 exports.getBookingPage = async (req, res) => {
     
     try {
+
+        if (req.session.user && req.session.user.role === 'Trader') {
+            return res.redirect('/');
+        }
 
         const serviceId = req.params.id;
 
@@ -90,35 +94,39 @@ exports.getBookingPage = async (req, res) => {
     }
 };
 
-// // Controller function to create booking / send to database
-// exports.createBooking = async (req, res) => {
+// Create booking / send to database
+exports.createBooking = async (req, res) => {
     
-//     try {
+    try {
 
-//         const serviceId = req.params.id;
+        const serviceId = req.params.id;
 
-//         const {job_date, job_start_time, job_description} = req.body;
+        let {trader_id, client_user_id, client_name, client_email, job_date, job_start_time, job_description} = req.body;
+        // reconverting to null 
+        client_user_id = client_user_id === '' ? null : client_user_id;
 
-//         const query = `
-//         INSERT INTO bookings
-//         (service_id, client_user_id, job_date, job_start_time, job_description, status)
-//         VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending')
-//         `
+        const query = `
+        INSERT INTO bookings
+        (service_id, client_user_id, client_name, client_email, job_date, job_start_time, job_description, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending')
+        `
 
-//         await db.query(query, [serviceId, client_user_id, job_date, job_start_time, job_description]);
+        await db.query(query, [serviceId, client_user_id, client_name, client_email, job_date, job_start_time, job_description]);
 
-//         res.redirect(`/traders/${trader_user_id}`);
+        res.redirect(`/traders/${trader_id}`);
 
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).send('Server Error.');
-//     }
-// }
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error.');
+    }
+}
 
+// Get login page
 exports.getLoginPage = (req, res) => {
     res.render('login');   
 };
 
+// Post login page
 exports.postLogin = async (req, res) => {
     
     try {
@@ -135,8 +143,13 @@ exports.postLogin = async (req, res) => {
         const [rows] = await db.query(checkUserSQL, [username, userpass]);
 
         if (rows.length === 1) {
-            req.session.isloggedin = true;
-            req.session.role = rows[0].role;
+            req.session.user = {
+                isloggedin: true,
+                id: rows[0].id,
+                role: rows[0].role,
+                full_name: rows[0].full_name,
+                email: rows[0].email,
+            }
 
             res.redirect('/');
         } else {
@@ -149,6 +162,7 @@ exports.postLogin = async (req, res) => {
     }
 };
 
+// Get logout
 exports.getLogout = (req, res) => {
     req.session.destroy(() => {
         res.clearCookie();

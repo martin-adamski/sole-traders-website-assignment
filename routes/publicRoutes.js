@@ -10,7 +10,7 @@ router.get('/traders/:id', publicController.getTraderProfile);
 
 router.get('/services/:id/book', publicController.getBookingPage);
 
-// router.post('/services/:id/book', publicController.createBooking);
+router.post('/services/:id/book', publicController.createBooking);
 
 router.get('/login', publicController.getLoginPage);
 router.post('/login', publicController.postLogin);

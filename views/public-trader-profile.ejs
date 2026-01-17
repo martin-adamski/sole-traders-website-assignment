@@ -19,7 +19,9 @@
             <li>
                 <h3><%= service.title %> (£<%= service.base_price %>)</h3>
                 <p><%= service.description %></p>
-                <a href="/services/<%= service.id %>/book">Book this service</a>
+                <% if (user.role !== 'Trader') { %>
+                    <a href="/services/<%= service.id %>/book">Book this service</a>
+                <% } %>
             </li>
             <br>
         <% }); %>

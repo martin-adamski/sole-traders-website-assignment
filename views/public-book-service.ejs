@@ -8,15 +8,16 @@
 <!-- need to reconcile whether a user has to have an account to create a booking or not-->
 <form action="/services/<%= service.id %>/book" method="POST">
     <input type="hidden" name="trader_id" value="<%= trader.id %>">
+    <input type="hidden" name="client_user_id" value="<%= user.id %>">
     
     <p>
         <label>Your Name:</label><br>
-        <input type="text" name="client_name" required>
+        <input type="text" name="client_name" value="<%= user.full_name %>" required>
     </p>
 
     <p>
         <label>Your Email:</label><br>
-        <input type="email" name="client_email" required>
+        <input type="email" name="client_email" value="<%= user.email %>" required>
     </p>
     
     <p>

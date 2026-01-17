@@ -13,14 +13,14 @@
             <li><strong><a href="/">Sole Traders</a></strong></li>
             <li><a href="/directory">Directory</a></li>
             
-            <% if (!isloggedin) { %>
+            <% if (!user.isloggedin) { %>
                 <li><a href="/login">Login</a></li>
                 <li><a href="/register">Register</a></li>
             <% } else { %>
-                <% if (role === 'Trader' || role === 'Client') { %>
+                <% if (user.role === 'Trader' || user.role === 'Client') { %>
                     <li><a href="/private-profile">View Profile</a></li>
                     <li><a href="/logout">Logout</a></li>
-                <% } else if (role === 'Admin') { %>
+                <% } else if (user.role === 'Admin') { %>
                     <li><a href="/logout">Logout</a></li>
                 <% } %>
             <% } %>

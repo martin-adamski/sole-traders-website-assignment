@@ -31,8 +31,7 @@ app.use(session({
 }));
 
 app.use((req, res, next) => {
-    res.locals.isloggedin = req.session.isloggedin || false;
-    res.locals.role = req.session.role;
+    res.locals.user = req.session.user || {isloggedin: false, id: null, role: '', full_name: '', email: ''};
     next();
 });
 
