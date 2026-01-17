@@ -8,16 +8,16 @@ exports.getHomePage = (req, res) => {
 // Controller function to get all traders
 exports.getAllTraders = async (req, res) => {
     try {
-        const [traders] = await db.query('SELECT * FROM traders');
+        const [traders] = await db.query('SELECT tp.*, u.full_name FROM trader_profiles tp LEFT JOIN users u ON tp.user_id = u.id');
 
         res.render('directory', { 
-            title: 'Find a Trader',
+            title: 'Trader Directory',
             traders: traders 
         });
 
     } catch (err) {
         console.error('Error fetching traders:', err);
-        res.status(500).send('Server Error');
+        res.status(500).send('Server Error.');
     }
 };
 
@@ -27,28 +27,35 @@ exports.getTraderProfile = async (req, res) => {
     try {
         
         const traderId = req.params.id;
+
+        const tp_query = `
+        SELECT tp.*, u.full_name 
+        FROM trader_profiles tp 
+        LEFT JOIN users u ON tp.user_id = u.id 
+        WHERE tp.user_id = ?
+        `
         
-        const [traderResults] = await db.query('SELECT * FROM traders WHERE id = ?', [traderId]);
+        const [traderResults] = await db.query(tp_query, [traderId]);
         const trader = traderResults[0];
 
         if (!trader) {
             return res.status(404).send('Trader not found.');
         }
 
-        const [services] = await db.query('SELECT * FROM services WHERE trader_id = ?', [traderId]);
+        const [services] = await db.query('SELECT * FROM services WHERE trader_user_id = ?', [traderId]);
 
-        res.render('trader-profile', {
-            title: `${trader.name} - Profile`,
+        res.render('public-trader-profile', {
+            title: `${trader.full_name} - Profile`,
             trader: trader,
             services: services,
         })
 
     } catch (err) {
         console.error(err);
-        res.status(500).send('Server error.');
+        res.status(500).send('Server Error.');
     }
 
-}
+};
 
 // Controller function to get booking page
 exports.getBookingPage = async (req, res) => {
@@ -58,9 +65,9 @@ exports.getBookingPage = async (req, res) => {
         const serviceId = req.params.id;
 
         const query = `
-            SELECT s.*, t.name as trader_name, t.id as trader_id 
+            SELECT s.*, u.full_name as trader_name
             FROM services s 
-            JOIN traders t ON s.trader_id = t.id 
+            LEFT JOIN users u ON s.trader_user_id = u.id 
             WHERE s.id = ?
         `;
 
@@ -71,39 +78,80 @@ exports.getBookingPage = async (req, res) => {
             return res.status(404).send('Service not found.');
         }
 
-        res.render('book-service', {
+        res.render('public-book-service', {
             title: 'Book Service',
             service: service,
-            trader: {id: service.trader_id, name: service.trader_name},
+            trader: {id: service.trader_user_id, name: service.trader_name},
         })
             
     } catch (err) {
         console.error(err);
-        res.status(500).send('Server error.');
+        res.status(500).send('Server Error.');
     }
-}
+};
 
-// Controller function to create booking / send to database
-exports.createBooking = async (req, res) => {
+// // Controller function to create booking / send to database
+// exports.createBooking = async (req, res) => {
+    
+//     try {
+
+//         const serviceId = req.params.id;
+
+//         const {job_date, job_start_time, job_description} = req.body;
+
+//         const query = `
+//         INSERT INTO bookings
+//         (service_id, client_user_id, job_date, job_start_time, job_description, status)
+//         VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending')
+//         `
+
+//         await db.query(query, [serviceId, client_user_id, job_date, job_start_time, job_description]);
+
+//         res.redirect(`/traders/${trader_user_id}`);
+
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).send('Server Error.');
+//     }
+// }
+
+exports.getLoginPage = (req, res) => {
+    res.render('login');   
+};
+
+exports.postLogin = async (req, res) => {
     
     try {
 
-        const serviceId = req.params.id;
+        const { username, userpass } = req.body;
 
-        const { client_name, client_email, job_date, job_start_time, job_description, trader_id} = req.body;
+        // temporary password handling
+        const checkUserSQL = `
+        SELECT *
+        FROM users
+        WHERE username = ? and password_hash = ?
+        `;
 
-        const query = `
-        INSERT INTO bookings
-        (service_id, trader_id, client_name, client_email, job_date, job_start_time, job_description, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending')
-        `
+        const [rows] = await db.query(checkUserSQL, [username, userpass]);
 
-        await db.query(query, [serviceId, trader_id, client_name, client_email, job_date, job_start_time, job_description]);
+        if (rows.length === 1) {
+            req.session.isloggedin = true;
+            req.session.role = rows[0].role;
 
-        res.redirect(`/traders/${trader_id}`);
+            res.redirect('/');
+        } else {
+            res.render('login', { errorMessage: 'Incorrect username or password.' });
+        }
 
     } catch (err) {
         console.error(err);
-        res.status(500).send('Server error.');
+        res.status(500).send('Server Error.');
     }
+};
+
+exports.getLogout = (req, res) => {
+    req.session.destroy(() => {
+        res.clearCookie();
+        res.redirect('/');
+    })
 }

@@ -2,10 +2,10 @@
 
 <h1>Request Booking</h1>
 <h2><%= service.title %> with <%= trader.name %></h2>
-<p>Price: £<%= service.price %></p>
+<p>Price: £<%= service.base_price %></p>
 
 <hr>
-
+<!-- need to reconcile whether a user has to have an account to create a booking or not-->
 <form action="/services/<%= service.id %>/book" method="POST">
     <input type="hidden" name="trader_id" value="<%= trader.id %>">
     

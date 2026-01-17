@@ -9,7 +9,7 @@
     <ul>
         <% traders.forEach(trader => { %>
             <li>
-                <h3><a href="/traders/<%= trader.id %>"><%= trader.name %></a></h3>
+                <h3><a href="/traders/<%= trader.user_id %>"><%= trader.full_name %></a></h3>
                 <p><%= trader.trade_type %> in <%= trader.region %></p>
             </li>
             <br>

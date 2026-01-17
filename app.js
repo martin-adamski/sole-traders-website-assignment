@@ -1,7 +1,10 @@
-require('dotenv').config({path: './config.env'}); // Load environment variables
+require('dotenv').config({path: './config.env'}); // Environment variables
 const express = require('express');
 const morgan = require('morgan');
 const path = require('path');
+
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
 
 // Import Database Check
 const db = require('./config/dbconnection');
@@ -19,6 +22,19 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 // Serve static files (CSS, Images) from the 'public' folder
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 3600000 }
+}));
+
+app.use((req, res, next) => {
+    res.locals.isloggedin = req.session.isloggedin || false;
+    res.locals.role = req.session.role;
+    next();
+});
 
 // 2. View Engine Setup
 app.set('view engine', 'ejs');
