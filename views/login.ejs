@@ -1,12 +1,23 @@
 <%- include('partials/header') %>
 
+<% if (locals.successfulMessage) { %>
+    <p id="success-msg" class="help is-success" style="font-weight: bold; margin-bottom: 10px;">
+        <%= successfulMessage %>
+    </p>
+<% } %>
+
 <h1>Login</h1>
 <form action="/login" method="post">
-    <label for="uname">Username</label>
-    <input type="text" name="username" id="uname" placeholder="Enter username" required>
+
+    <div>
+        <label for="uname">Username</label>
+        <input type="text" name="username" id="uname" placeholder="Enter username" required>
+    </div>
     
-    <label for="upass">Password</label>
-    <input type="password" name="userpass" id="upass" placeholder="Enter password" required>
+    <div>
+        <label for="upass">Password</label>
+        <input type="password" name="userpass" id="upass" placeholder="Enter password" required>
+    </div>
     
     <% if (locals.errorMessage) { %>
         <p id="error-msg" class="help is-danger" style="font-weight: bold; margin-bottom: 10px;">
@@ -14,7 +25,7 @@
         </p>
     <% } %>
 
-    <button type="submit">Login</button>
+    <button type="submit">Submit</button>
 </form>
 
 <%- include('partials/footer') %>

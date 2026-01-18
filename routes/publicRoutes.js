@@ -16,4 +16,10 @@ router.get('/login', publicController.getLoginPage);
 router.post('/login', publicController.postLogin);
 router.get('/logout', publicController.getLogout);
 
+router.get('/register', publicController.getRegisterPage);
+router.post('/register', publicController.postRegisterPage);
+
+router.get('/create-profile', publicController.getCreateProfilePage);
+// for later -- router.get('/edit-profile', publicController.getCreateProfilePage);
+
 module.exports = router;

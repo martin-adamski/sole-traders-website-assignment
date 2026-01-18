@@ -5,41 +5,41 @@
 <p>Price: £<%= service.base_price %></p>
 
 <hr>
-<!-- need to reconcile whether a user has to have an account to create a booking or not-->
+
+<% if (locals.successfulMessage) { %>
+    <p id="success-msg" class="help is-success" style="font-weight: bold; margin-bottom: 10px;">
+        <%= successfulMessage %>
+    </p>
+<% } %>
+
 <form action="/services/<%= service.id %>/book" method="POST">
     <input type="hidden" name="trader_id" value="<%= trader.id %>">
     <input type="hidden" name="client_user_id" value="<%= user.id %>">
-    
-    <% if (locals.successfulMessage) { %>
-        <p id="success-msg" class="help is-success" style="font-weight: bold; margin-bottom: 10px;">
-            <%= successfulMessage %>
-        </p>
-    <% } %>
 
-    <p>
-        <label>Your Name:</label><br>
-        <input type="text" name="client_name" value="<%= user.full_name %>" required>
-    </p>
+    <div>
+        <label for="cname">Your Name:</label>
+        <input type="text" name="client_name" id="cname" value="<%= user.full_name %>" required>
+    </div>
 
-    <p>
-        <label>Your Email:</label><br>
-        <input type="email" name="client_email" value="<%= user.email %>" required>
-    </p>
+    <div>
+        <label for="cemail">Your Email:</label>
+        <input type="email" name="client_email" id="cemail" value="<%= user.email %>" required>
+    </div>
     
-    <p>
-        <label>Date:</label><br>
-        <input type="date" name="job_date" required>
-    </p>
+    <div>
+        <label for="date">Date:</label>
+        <input type="date" name="job_date" id="date" required>
+    </div>
     
-    <p>
-        <label>Start Time:</label><br>
-        <input type="time" name="job_start_time" required>
-    </p>
+    <div>
+        <label for="start_time">Start Time:</label>
+        <input type="time" name="job_start_time" id="start_time" required>
+    </div>
     
-    <p>
-        <label>Notes:</label><br>
-        <textarea name="job_description" rows="5" required></textarea>
-    </p>
+    <div>
+        <label for="description">Notes:</label>
+        <textarea name="job_description" rows="5" id="description" required></textarea>
+    </div>
 
     <button type="submit">Confirm Booking</button> 
     or <a href="/traders/<%= trader.id %>">Cancel</a>

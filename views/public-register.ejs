@@ -1,0 +1,39 @@
+<%- include('partials/header') %>
+
+<h1>Create an account</h1>
+<form action="/register" method="post">
+
+    <div>
+        <label for="uemail">Email</label>
+        <input type="text" name="useremail" id="uemail" placeholder="Enter email" required>
+    </div>
+
+    <div>
+        <label for="upass">Password</label>
+        <input type="password" name="userpass" id="upass" placeholder="Enter password" required>
+    </div>
+
+    <div>
+        <label for="uname">Username</label>
+        <input type="text" name="username" id="uname" placeholder="Enter username" required>
+    </div>
+    
+    <div>
+        <label for="ufullname">Full Name</label>
+        <input type="text" name="userfullname" id="ufullname" placeholder="Enter full name" required>
+    </div>
+
+    <fieldset>
+        <legend>Do you wish to register as a client or a trader?</legend>
+
+        <input type="radio" id="userChoice1" name="userrole" value="client" required>
+        <label for="userChoice1">Client</label>
+        
+        <input type="radio" id="userChoice2" name="userrole" value="trader" required>
+        <label for="userChoice2">Trader</label>
+    </fieldset>
+
+    <button type="submit">Submit</button>
+</form>
+
+<%- include('partials/footer') %>

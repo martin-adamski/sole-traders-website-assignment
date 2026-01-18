@@ -10,7 +10,7 @@ exports.getAllTraders = async (req, res) => {
     try {
         const [traders] = await db.query('SELECT tp.*, u.full_name FROM trader_profiles tp LEFT JOIN users u ON tp.user_id = u.id');
 
-        res.render('directory', { 
+        res.render('public-directory', { 
             title: 'Trader Directory',
             traders: traders 
         });
@@ -113,7 +113,7 @@ exports.createBooking = async (req, res) => {
 
         await db.query(query, [serviceId, client_user_id, client_name, client_email, job_date, job_start_time, job_description]);
 
-        res.locals.successfulMessage = 'Successful Booking.';
+        res.locals.successfulMessage = 'Booking Successful.';
 
         return exports.getBookingPage(req, res);
 
@@ -171,3 +171,41 @@ exports.getLogout = (req, res) => {
         res.redirect('/');
     })
 }
+
+// Get register page
+exports.getRegisterPage = (req, res) => {
+    
+    if (!req.session.isloggedin || req.session.role === 'Admin') {
+        res.render('public-register'); 
+    } else {
+        return res.redirect('/');
+    }
+};
+
+// Post register page
+exports.postRegisterPage = async (req, res) => {
+
+    const { useremail, userpass, username, userfullname, userrole } = req.body;
+
+    const query = `
+    INSERT INTO users
+    (username, email, full_name, password_hash, role)
+    VALUES (?, ?, ?, ?, ?)
+    `;
+
+    await db.query(query, [username, useremail, userfullname, userpass, userrole])
+
+    res.locals.successfulMessage = 'Registered Successfully. You can now log into your account.';
+
+    return exports.getLoginPage(req, res);
+};
+
+// Get create profile page
+exports.getCreateProfilePage = (req, res) => {
+    
+    if ((req.session.user?.role === 'Trader' || req.session.user?.role === 'Admin')) {
+        res.render('private-create-trader-profile'); 
+    } else {
+        return res.redirect('/');
+    }
+};
