@@ -175,37 +175,134 @@ exports.getLogout = (req, res) => {
 // Get register page
 exports.getRegisterPage = (req, res) => {
     
-    if (!req.session.isloggedin || req.session.role === 'Admin') {
-        res.render('public-register'); 
-    } else {
-        return res.redirect('/');
+
+    try {
+
+        if (!req.session.isloggedin || req.session.role === 'Admin') {
+            res.render('public-register'); 
+        } else {
+            return res.redirect('/');
+        }
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error.');
     }
 };
 
 // Post register page
 exports.postRegisterPage = async (req, res) => {
 
-    const { useremail, userpass, username, userfullname, userrole } = req.body;
 
-    const query = `
-    INSERT INTO users
-    (username, email, full_name, password_hash, role)
-    VALUES (?, ?, ?, ?, ?)
-    `;
+    try {
 
-    await db.query(query, [username, useremail, userfullname, userpass, userrole])
+        const { useremail, userpass, username, userfullname, userrole } = req.body;
 
-    res.locals.successfulMessage = 'Registered Successfully. You can now log into your account.';
+        const query = `
+        INSERT INTO users
+        (username, email, full_name, password_hash, role)
+        VALUES (?, ?, ?, ?, ?)
+        `;
 
-    return exports.getLoginPage(req, res);
+        await db.query(query, [username, useremail, userfullname, userpass, userrole])
+
+        req.session.message = {
+        type: 'is-success',
+        text: 'Registered Successfully. You can now log into your account.',
+    };
+
+        // Forcing the session save to display the message
+        req.session.save(err => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Session save error');
+            }
+            return res.redirect('/login');
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error.');
+    }
 };
 
-// Get create profile page
-exports.getCreateProfilePage = (req, res) => {
-    
-    if ((req.session.user?.role === 'Trader' || req.session.user?.role === 'Admin')) {
-        res.render('private-create-trader-profile'); 
-    } else {
-        return res.redirect('/');
+// Get edit profile page
+exports.getEditProfilePage = async (req, res) => {
+
+    try {
+        
+        if ((req.session.user?.role === 'Trader' || req.session.user?.role === 'Admin')) {
+
+            const traderId = req.session.user.id;
+
+            const query = `
+            SELECT tp.*, u.full_name 
+            FROM users u
+            LEFT JOIN trader_profiles tp ON u.id = tp.user_id
+            WHERE u.id = ?
+            `
+
+            const [rows] = await db.query(query, [traderId]);
+            let data = rows[0];
+
+            const safeProfile = {
+                trade_type: data.trade_type || '', 
+                region: data.region || '',
+                bio: data.bio || '',
+                availability: data.availability_text || '',
+                full_name: data.full_name
+            };
+
+            res.render('private-edit-trader-profile', {
+                trader_id: traderId,
+                profile: safeProfile,    
+            }); 
+        } else {
+            return res.redirect('/');
+        }
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error.');
+    }
+};
+
+// Post edit page
+exports.postEditProfilePage = async (req, res) => {
+
+    try {
+
+        const { trader_id, trade_type, city, bio, availability } = req.body;
+
+        const query = `
+        INSERT INTO trader_profiles
+        (user_id, trade_type, region, bio, availability_text)
+        VALUES (?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+            trade_type = VALUES(trade_type),
+            region = VALUES(region),
+            bio = VALUES(bio),
+            availability_text = VALUES(availability_text)
+        `;
+        
+        await db.query(query, [trader_id, trade_type, city, bio, availability])
+        
+        req.session.message = {
+        type: 'is-success',
+        text: 'Your profile has been edited succesfully.',
+    };
+        
+        // Forcing the session save to display the message
+        req.session.save(err => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Session save error');
+            }
+            return res.redirect('/edit-profile');
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error.');
     }
 };

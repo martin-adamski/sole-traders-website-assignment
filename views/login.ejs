@@ -1,8 +1,8 @@
 <%- include('partials/header') %>
 
-<% if (locals.successfulMessage) { %>
-    <p id="success-msg" class="help is-success" style="font-weight: bold; margin-bottom: 10px;">
-        <%= successfulMessage %>
+<% if (locals.message) { %>
+    <p id="flash-msg" class="help <%= message.type %>" style="font-weight: bold; margin-bottom: 10px;">
+        <%= message.text %>
     </p>
 <% } %>
 

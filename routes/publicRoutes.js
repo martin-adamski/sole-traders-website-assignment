@@ -19,7 +19,7 @@ router.get('/logout', publicController.getLogout);
 router.get('/register', publicController.getRegisterPage);
 router.post('/register', publicController.postRegisterPage);
 
-router.get('/create-profile', publicController.getCreateProfilePage);
-// for later -- router.get('/edit-profile', publicController.getCreateProfilePage);
+router.get('/edit-profile', publicController.getEditProfilePage);
+router.post('/edit-profile', publicController.postEditProfilePage);
 
 module.exports = router;

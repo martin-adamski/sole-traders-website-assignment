@@ -1,0 +1,41 @@
+<%- include('partials/header') %>
+
+<hr>
+
+<% if (locals.message) { %>
+    <p id="flash-msg" class="help <%= message.type %>" style="font-weight: bold; margin-bottom: 10px;">
+        <%= message.text %>
+    </p>
+<% } %>
+
+<h1>Edit Trader Profile</h1>
+
+<form action="/edit-profile" method="POST">
+    <input type="hidden" name="trader_id" value="<%= trader_id %>">
+
+    <div>
+        <label for="trade_typeChoice">Trade Type:</label>
+        <input type="text" name="trade_type" id="trade_typeChoice" value="<%= profile.trade_type %>" required>
+    </div>
+
+    <div>
+        <label for="cityChoice">City:</label>
+        <input type="text" name="city" id="cityChoice" value="<%= profile.region %>" required>
+    </div>
+    
+    <div>
+        <label for="bioText">Bio:</label>
+        <textarea name="bio" rows="5" id="bioText" required><%= profile.bio %></textarea>
+    </div>
+
+    <!-- when working on availability for booking, maybe will change that-->
+    <div>
+        <label for="availabilityText">Availability:</label>
+        <textarea name="availability" rows="5" id="availabilityText" required><%= profile.availability %></textarea>
+    </div>
+
+    <button type="submit">Save Profile</button>
+
+</form>
+
+<%- include('partials/footer') %>

@@ -27,11 +27,22 @@ app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 3600000 }
+    cookie: { secure: false, maxAge: 3600000 }
 }));
 
 app.use((req, res, next) => {
     res.locals.user = req.session.user || {isloggedin: false, id: null, role: '', full_name: '', email: ''};
+
+    // If the browser is asking for an icon, css, or js file that wasn't found in 'public', it shouldn't eat the flash message
+    // APIs might also steal the message, so adding that there for now as a precaution for when I work on the apis
+    const ignoredPaths = ['/favicon.ico', '/css', '/js', '/images', '/api'];
+    const isIgnored = ignoredPaths.some(path => req.path.startsWith(path));
+
+    if (!isIgnored) {
+        // Only consume the message if this is a real page request
+        res.locals.message = req.session.message;
+        delete req.session.message; 
+    }
     next();
 });
 
