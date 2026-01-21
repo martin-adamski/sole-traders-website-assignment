@@ -17,8 +17,11 @@
                 <li><a href="/login">Login</a></li>
                 <li><a href="/register">Register</a></li>
             <% } else { %>
-                <% if (user.role === 'Trader' || user.role === 'Client') { %>
-                    <li><a href="/private-profile">View Profile</a></li>
+                <% if (user.role === 'Trader') { %>
+                    <li><a href="/view-profile">View Profile</a></li>
+                    <li><a href="/logout">Logout</a></li>
+                <% } else if (user.role === 'Client') { %>
+                    <li><a href="/view-bookings">Bookings</a></li>
                     <li><a href="/logout">Logout</a></li>
                 <% } else if (user.role === 'Admin') { %>
                     <li><a href="/logout">Logout</a></li>

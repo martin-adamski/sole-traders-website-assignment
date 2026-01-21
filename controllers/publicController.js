@@ -306,3 +306,44 @@ exports.postEditProfilePage = async (req, res) => {
         res.status(500).send('Server Error.');
     }
 };
+
+// Get view profile page
+exports.getViewProfilePage = async (req, res) => {
+
+    try {
+        
+        if ((req.session.user?.role === 'Trader' || req.session.user?.role === 'Admin')) {
+
+            const traderId = req.session.user.id;
+
+            const query = `
+            SELECT tp.*, u.full_name 
+            FROM users u
+            LEFT JOIN trader_profiles tp ON u.id = tp.user_id
+            WHERE u.id = ?
+            `
+
+            const [rows] = await db.query(query, [traderId]);
+            let data = rows[0];
+
+            const safeProfile = {
+                trade_type: data.trade_type || '', 
+                region: data.region || '',
+                bio: data.bio || '',
+                availability: data.availability_text || '',
+                full_name: data.full_name
+            };
+
+            res.render('private-view-trader-profile', {
+                trader_id: traderId,
+                profile: safeProfile,    
+            }); 
+        } else {
+            return res.redirect('/');
+        }
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error.');
+    }
+};

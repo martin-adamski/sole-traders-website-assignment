@@ -1,0 +1,31 @@
+<%- include('partials/header') %>
+
+<div class="content">
+
+    <div>
+        <h2>Your Trader Profile</h2>    
+    </div>
+    <div>
+        <h4>Full Name:</h4>
+        <h5><%= profile.full_name %></h5>
+    </div>
+    <div>
+        <h4>Trade Type:</h4>
+        <h5><%= profile.trade_type %></h5>
+    </div>
+    <div>
+        <h4>City:</h4>
+        <h5><%= profile.region %></h5>
+    </div>
+    <div>
+        <h4>Bio:</h4>
+        <h5><%= profile.bio %></h5>
+    </div>
+    <div>
+        <h4>Availability Text:</h4>
+        <h5><%= profile.availability %></h5>
+    </div>
+
+</div>
+
+<%- include('partials/footer') %>

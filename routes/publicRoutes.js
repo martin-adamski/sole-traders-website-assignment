@@ -22,4 +22,6 @@ router.post('/register', publicController.postRegisterPage);
 router.get('/edit-profile', publicController.getEditProfilePage);
 router.post('/edit-profile', publicController.postEditProfilePage);
 
+router.get('/view-profile', publicController.getViewProfilePage);
+
 module.exports = router;
