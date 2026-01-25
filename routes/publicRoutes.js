@@ -24,4 +24,6 @@ router.post('/edit-profile', publicController.postEditProfilePage);
 
 router.get('/view-profile', publicController.getViewProfilePage);
 
+router.get('/view-bookings', publicController.getViewTraderBookingsPage);
+
 module.exports = router;

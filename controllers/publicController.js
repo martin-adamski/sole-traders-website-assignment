@@ -33,7 +33,7 @@ exports.getTraderProfile = async (req, res) => {
         FROM trader_profiles tp 
         LEFT JOIN users u ON tp.user_id = u.id 
         WHERE tp.user_id = ?
-        `
+        `;
         
         const [traderResults] = await db.query(tp_query, [traderId]);
         const trader = traderResults[0];
@@ -109,7 +109,7 @@ exports.createBooking = async (req, res) => {
         INSERT INTO bookings
         (service_id, client_user_id, client_name, client_email, job_date, job_start_time, job_description, status)
         VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending')
-        `
+        `;
 
         await db.query(query, [serviceId, client_user_id, client_name, client_email, job_date, job_start_time, job_description]);
 
@@ -240,7 +240,7 @@ exports.getEditProfilePage = async (req, res) => {
             FROM users u
             LEFT JOIN trader_profiles tp ON u.id = tp.user_id
             WHERE u.id = ?
-            `
+            `;
 
             const [rows] = await db.query(query, [traderId]);
             let data = rows[0];
@@ -321,7 +321,7 @@ exports.getViewProfilePage = async (req, res) => {
             FROM users u
             LEFT JOIN trader_profiles tp ON u.id = tp.user_id
             WHERE u.id = ?
-            `
+            `;
 
             const [rows] = await db.query(query, [traderId]);
             let data = rows[0];
@@ -337,6 +337,75 @@ exports.getViewProfilePage = async (req, res) => {
             res.render('private-view-trader-profile', {
                 trader_id: traderId,
                 profile: safeProfile,    
+            }); 
+        } else {
+            return res.redirect('/');
+        }
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error.');
+    }
+};
+
+// Get view bookings page
+exports.getViewTraderBookingsPage = async (req, res) => {
+
+    try {
+        
+        if ((req.session.user?.role === 'Trader' || req.session.user?.role === 'Admin')) {
+
+            const traderId = req.session.user.id;
+
+            const queryConfirmed = `
+            SELECT
+            b.id as booking_id
+            , s.title as service_name
+            , s.description as service_description
+            , b.job_description as client_description
+            , b.job_date
+            , b.job_start_time
+            , b.status as job_status
+            , s.price_type
+            , s.base_price
+            , u.id as trader_user_id
+            FROM bookings b
+            INNER JOIN services s
+                on b.service_id = s.id
+            INNER JOIN users u
+                on u.id = s.trader_user_id
+            WHERE u.id = ?
+                AND b.status = 'Confirmed'
+            `;
+
+            const queryPending = `
+            SELECT
+            b.id as booking_id
+            , s.title as service_name
+            , s.description as service_description
+            , b.job_description as client_description
+            , b.job_date
+            , b.job_start_time
+            , b.status as job_status
+            , s.price_type
+            , s.base_price
+            , u.id as trader_user_id
+            FROM bookings b
+            INNER JOIN services s
+                on b.service_id = s.id
+            INNER JOIN users u
+                on u.id = s.trader_user_id
+            WHERE u.id = ?
+                AND b.status = 'Pending'
+            `;
+
+            const [bookingsConfirmed] = await db.query(queryConfirmed, [traderId]);
+            const [bookingsPending] = await db.query(queryPending, [traderId]);
+
+            res.render('private-view-trader-bookings', {
+                trader_id: traderId,   
+                bookingsConfirmed: bookingsConfirmed,    
+                bookingsPending: bookingsPending,    
             }); 
         } else {
             return res.redirect('/');
