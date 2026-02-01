@@ -1,0 +1,234 @@
+const db = require('../config/dbconnection');
+
+// Post login page
+exports.postLogin = async (req, res) => {
+    
+    try {
+        const { username, userpass } = req.body;
+
+        if (!username || !userpass) {
+            return res.status(400).json({
+                status: 'failure',
+                message: 'Username and password are required'
+            });
+        };
+
+        // temporary password handling
+        const checkUserSQL = `
+        SELECT *
+        FROM users
+        WHERE username = ? and password_hash = ?
+        `;
+        //
+
+        const [rows] = await db.query(checkUserSQL, [username, userpass]);
+
+        if (rows.length === 0) {
+            return res.status(401).json({
+                status: 'failure',
+                message: 'Invalid credentials'
+            });
+        };
+
+        if (rows.length === 1) {
+            return res.status(200).json({
+                status: 'success',
+                result: rows[0]
+            });
+        };
+
+    } catch (err) {
+        console.error("API Error: ", err);
+        return res.status(500).json({
+            status: 'error',
+            message: 'Server error'
+        });
+    };
+};
+
+// Get edit profile page
+exports.getEditProfilePage = async (req, res) => {
+
+    try {
+        const traderId = req.params.id;
+
+        const query = `
+        SELECT tp.*, u.full_name 
+        FROM users u
+        LEFT JOIN trader_profiles tp ON u.id = tp.user_id
+        WHERE u.id = ?
+        `;
+        
+        const [rows] = await db.query(query, [traderId]);
+
+        if (rows.length === 0) {
+            return res.status(401).json({
+                stauts: 'failure',
+                message: 'User not found'
+            });
+        };
+        
+        return res.status(200).json({
+            status: 'success',
+            result: rows[0]
+        });
+
+    } catch (err) {
+        console.error("API Error: ", err);
+        return res.status(500).json({
+            status: 'error',
+            message: 'Server error'
+        });
+    };
+};
+
+// Post edit page
+exports.postEditProfilePage = async (req, res) => {
+
+    try {
+        const { trader_id, trade_type, city, bio, availability } = req.body;
+
+        if (!trader_id) {
+            return res.status(401).json({
+                status: 'failure',
+                message: 'Trader ID is required'
+            });
+        };
+
+        const query = `
+        INSERT INTO trader_profiles
+        (user_id, trade_type, region, bio, availability_text)
+        VALUES (?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+            trade_type = VALUES(trade_type),
+            region = VALUES(region),
+            bio = VALUES(bio),
+            availability_text = VALUES(availability_text)
+        `;
+        
+        await db.query(query, [trader_id, trade_type, city, bio, availability])
+    
+        return res.status(200).json({
+            status: 'success',
+            message: 'Profile saved successfully'
+        });
+
+    } catch (err) {
+        console.error("API Error: ", err);
+        return res.status(500).json({
+            status: 'error',
+            message: 'Server error'
+        });
+    };
+};
+
+// Get view profile page
+exports.getViewProfilePage = async (req, res) => {
+
+    try {
+        const traderId = req.params.id;
+
+        const query = `
+        SELECT tp.*, u.full_name 
+        FROM users u
+        LEFT JOIN trader_profiles tp ON u.id = tp.user_id
+        WHERE u.id = ?
+        `;
+
+        const [rows] = await db.query(query, [traderId]);
+            
+        if (rows.length === 0) {
+            return res.status(401).json({
+                status: 'failure',
+                message: 'User not found'
+            });
+        };
+        
+        return res.status(200).json({
+            status: 'success',
+            result: rows[0]
+        });
+    
+    } catch (err) {
+        console.error("API Error: ", err);
+        return res.status(500).json({
+            status: 'error',
+            message: 'Server error'
+        });
+    };
+};
+
+// Get view bookings page
+exports.getViewTraderBookingsPage = async (req, res) => {
+
+    try {
+        const traderId = req.params.id;
+
+        if (!traderId) {
+            return res.status(401).json({
+                status: 'failure',
+                message: 'Trader ID is required'
+            });
+        };
+
+        const queryConfirmed = `
+        SELECT
+        b.id as booking_id
+        , s.title as service_name
+        , s.description as service_description
+        , b.job_description as client_description
+        , b.job_date
+        , b.job_start_time
+        , b.status as job_status
+        , s.price_type
+        , s.base_price
+        , u.id as trader_user_id
+        FROM bookings b
+        INNER JOIN services s
+            on b.service_id = s.id
+        INNER JOIN users u
+            on u.id = s.trader_user_id
+                AND u.id = ?
+        WHERE b.status = 'Confirmed'
+            `;
+
+        const queryPending = `
+        SELECT
+        b.id as booking_id
+        , s.title as service_name
+        , s.description as service_description
+        , b.job_description as client_description
+        , b.job_date
+        , b.job_start_time
+        , b.status as job_status
+        , s.price_type
+        , s.base_price
+        , u.id as trader_user_id
+        FROM bookings b
+        INNER JOIN services s
+            on b.service_id = s.id
+        INNER JOIN users u
+            on u.id = s.trader_user_id
+                AND u.id = ?
+        WHERE b.status = 'Pending'
+            `;
+
+        const [bookingsConfirmed] = await db.query(queryConfirmed, [traderId]);
+        const [bookingsPending] = await db.query(queryPending, [traderId]);
+
+        return res.status(200).json({
+            status: 'success',
+            result: {
+                confirmed: bookingsConfirmed,
+                pending: bookingsPending
+            }
+        });
+
+    } catch (err) {
+        console.error("API Error: ", err);
+        return res.status(500).json({
+            status: 'error',
+            message: 'Server error'
+        });
+    };
+};

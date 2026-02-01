@@ -1,0 +1,15 @@
+<%- include('partials/header') %>
+
+<div class="error-container">
+        <h1 class="error-code">500</h1>
+
+        <h2 class="error-title">Oops! Something went wrong.</h2>
+
+        <p class="error-message">
+            <%= typeof message !== 'undefined' ? message : "We're experiencing technical difficulties. Please try again later." %>
+        </p>
+
+        <a href="/" class="btn-home">Return to Home</a>
+</div>
+
+<%- include('partials/footer') %>

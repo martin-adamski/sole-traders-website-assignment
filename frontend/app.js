@@ -13,6 +13,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const publicRoutes = require('./routes/publicRoutes');
+const privateRoutes = require('./routes/privateRoutes');
 
 // 1. Middleware
 app.use(morgan('tiny'));
@@ -51,15 +52,16 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // 3. Routes
-app.use('/', publicRoutes)
+app.use('/', publicRoutes);
+app.use('/', privateRoutes);
 
 // 4. Server Start
 // DB connection test before starting the server
 const startServer = async () => {
     try {
         // Simple query to test DB connection
-        await db.query('SELECT 1');
-        console.log('Database connected successfully');
+        // await db.query('SELECT 1');
+        // console.log('Database connected successfully');
         
         app.listen(PORT, () => {
             console.log(`Server running at http://localhost:${PORT}`);
