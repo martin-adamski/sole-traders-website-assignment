@@ -1,173 +1,174 @@
-// const db = require('../config/dbconnection');
+const db = require('../config/dbconnection');
 
-// // Get all traders
-// exports.getAllTraders = async (req, res) => {
-//     try {
-//         const [traders] = await db.query('SELECT tp.*, u.full_name FROM trader_profiles tp LEFT JOIN users u ON tp.user_id = u.id');
+// Get all traders
+exports.getAllTraders = async (req, res) => {
+    try {
+        const [traders] = await db.query('SELECT tp.*, u.full_name FROM trader_profiles tp LEFT JOIN users u ON tp.user_id = u.id');
 
-//         res.render('public-directory', { 
-//             title: 'Trader Directory',
-//             traders: traders 
-//         });
+        return res.status(200).json({
+            status: 'success',
+            result: {
+                title: 'Trader Directory',
+                traders: traders
+            }
+        });
 
-//     } catch (err) {
-//         console.error('Error fetching traders:', err);
-//         res.status(500).send('Server Error.');
-//     }
-// };
+    } catch (err) {
+        console.error("API Error: ", err);
+        return res.status(500).json({
+            status: 'error',
+            message: 'Server error'
+        });
+    };
+};
 
-// // Get trader profile
-// exports.getTraderProfile = async (req, res) => {
+// Get trader profile
+exports.getTraderProfile = async (req, res) => {
     
-//     try {
+    try {
+        const traderId = req.params.id;
+
+        if (!traderId) {
+            return res.status(400).json({
+                status: 'failure',
+                message: 'Trader ID is required'
+            });
+        };
+
+        const tp_query = `
+        SELECT tp.*, u.full_name 
+        FROM trader_profiles tp 
+        LEFT JOIN users u ON tp.user_id = u.id 
+        WHERE tp.user_id = ?
+        `;
         
-//         const traderId = req.params.id;
+        const [traderResults] = await db.query(tp_query, [traderId]);
+        const trader = traderResults[0];
 
-//         const tp_query = `
-//         SELECT tp.*, u.full_name 
-//         FROM trader_profiles tp 
-//         LEFT JOIN users u ON tp.user_id = u.id 
-//         WHERE tp.user_id = ?
-//         `;
-        
-//         const [traderResults] = await db.query(tp_query, [traderId]);
-//         const trader = traderResults[0];
+        const [services] = await db.query('SELECT * FROM services WHERE trader_user_id = ?', [traderId]);
 
-//         if (!trader) {
-//             return res.status(404).send('Trader not found.');
-//         }
+        return res.status(200).json({
+            status: 'success',
+            result: {
+                title: `${trader.full_name} - Profile`,
+                trader: trader,
+                services: services,
+            }
+        });
 
-//         const [services] = await db.query('SELECT * FROM services WHERE trader_user_id = ?', [traderId]);
+    } catch (err) {
+        console.error("API Error: ", err);
+        return res.status(500).json({
+            status: 'error',
+            message: 'Server error'
+        });
+    };
+};
 
-//         res.render('public-trader-profile', {
-//             title: `${trader.full_name} - Profile`,
-//             trader: trader,
-//             services: services,
-//         })
-
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).send('Server Error.');
-//     }
-
-// };
-
-// // Get booking page
-// exports.getBookingPage = async (req, res) => {
+// Get booking page
+exports.getBookingPage = async (req, res) => {
     
-//     try {
+    try {
+        const serviceId = req.params.id;
 
-//         if (req.session.user && req.session.user.role === 'Trader') {
-//             return res.redirect('/');
-//         }
+        if (!serviceId) {
+            return res.status(400).json({
+                status: 'failure',
+                message: 'Service ID is required'
+            });
+        };
 
-//         const serviceId = req.params.id;
+        const query = `
+            SELECT s.*, u.full_name as trader_name
+            FROM services s 
+            LEFT JOIN users u ON s.trader_user_id = u.id 
+            WHERE s.id = ?
+        `;
 
-//         const query = `
-//             SELECT s.*, u.full_name as trader_name
-//             FROM services s 
-//             LEFT JOIN users u ON s.trader_user_id = u.id 
-//             WHERE s.id = ?
-//         `;
+        const [results] = await db.query(query, [serviceId]);
+        const service = results[0];
 
-//         const [results] = await db.query(query, [serviceId]);
-//         const service = results[0];
-
-//         if (!service) {
-//             return res.status(404).send('Service not found.');
-//         }
-
-//         res.render('public-book-service', {
-//             title: 'Book Service',
-//             service: service,
-//             trader: {id: service.trader_user_id, name: service.trader_name},
-//         })
+        if (!service) {
+            return res.status(404).json({
+                status: 'failure',
+                message: 'Service not found'
+            });
+        };
             
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).send('Server Error.');
-//     }
-// };
+        return res.status(200).json({
+            status: 'success',
+            result: {
+                title: 'Book Service',
+                service: service,
+                trader: {
+                    id: service.trader_user_id, 
+                    name: service.trader_name
+                },
+            }
+        });
 
-// // Create booking / send to database
-// exports.createBooking = async (req, res) => {
+    } catch (err) {
+        console.error("API Error: ", err);
+        return res.status(500).json({
+            status: 'error',
+            message: 'Server error'
+        });
+    };
+};
+
+// Create booking / send to database
+exports.createBooking = async (req, res) => {
     
-//     try {
+    try {
+        const serviceId = req.params.id;
+        const {client_user_id, client_name, client_email, job_date, job_start_time, job_description} = req.body;
 
-//         const serviceId = req.params.id;
+        const query = `
+        INSERT INTO bookings
+        (service_id, client_user_id, client_name, client_email, job_date, job_start_time, job_description, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending')
+        `;
 
-//         let {client_user_id, client_name, client_email, job_date, job_start_time, job_description} = req.body;
-//         // converting to null again
-//         client_user_id = client_user_id === '' ? null : client_user_id;
+        await db.query(query, [serviceId, client_user_id, client_name, client_email, job_date, job_start_time, job_description]);
 
-//         const query = `
-//         INSERT INTO bookings
-//         (service_id, client_user_id, client_name, client_email, job_date, job_start_time, job_description, status)
-//         VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending')
-//         `;
+        return res.status(200).json({
+            status: 'success',
+            message: 'Booking successful'
+        });
 
-//         await db.query(query, [serviceId, client_user_id, client_name, client_email, job_date, job_start_time, job_description]);
+    } catch (err) {
+        console.error("API Error: ", err);
+        return res.status(500).json({
+            status: 'error',
+            message: 'Server error'
+        });
+    };
+};
 
-//         res.locals.successfulMessage = 'Booking Successful.';
+// Post register page
+exports.postRegisterPage = async (req, res) => {
 
-//         return exports.getBookingPage(req, res);
+    try {
+        const { useremail, userpass, username, userfullname, userrole } = req.body;
 
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).send('Server Error.');
-//     }
-// }
+        const query = `
+        INSERT INTO users
+        (username, email, full_name, password_hash, role)
+        VALUES (?, ?, ?, ?, ?)
+        `;
 
-// // Get register page
-// exports.getRegisterPage = (req, res) => {
-    
+        await db.query(query, [username, useremail, userfullname, userpass, userrole])
 
-//     try {
+        return res.status(200).json({
+            status: 'success',
+            message: 'Registration successful'
+        });
 
-//         if (!req.session.isloggedin || req.session.role === 'Admin') {
-//             res.render('public-register'); 
-//         } else {
-//             return res.redirect('/');
-//         }
-
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).send('Server Error.');
-//     }
-// };
-
-// // Post register page
-// exports.postRegisterPage = async (req, res) => {
-
-
-//     try {
-
-//         const { useremail, userpass, username, userfullname, userrole } = req.body;
-
-//         const query = `
-//         INSERT INTO users
-//         (username, email, full_name, password_hash, role)
-//         VALUES (?, ?, ?, ?, ?)
-//         `;
-
-//         await db.query(query, [username, useremail, userfullname, userpass, userrole])
-
-//         req.session.message = {
-//         type: 'is-success',
-//         text: 'Registered Successfully. You can now log into your account.',
-//     };
-
-//         // Forcing the session save to display the message
-//         req.session.save(err => {
-//             if (err) {
-//                 console.error(err);
-//                 return res.status(500).send('Session save error');
-//             }
-//             return res.redirect('/login');
-//         });
-
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).send('Server Error.');
-//     }
-// };
+    } catch (err) {
+        console.error("API Error: ", err);
+        return res.status(500).json({
+            status: 'error',
+            message: 'Server error'
+        });
+    };
+};

@@ -1,5 +1,3 @@
-const db = require('../config/dbconnection');
-
 const axios = require('axios');
 
 // Get home page
@@ -10,16 +8,19 @@ exports.getHomePage = (req, res) => {
 // Get all traders
 exports.getAllTraders = async (req, res) => {
     try {
-        const [traders] = await db.query('SELECT tp.*, u.full_name FROM trader_profiles tp LEFT JOIN users u ON tp.user_id = u.id');
+        const endpoint = 'http://localhost:3003/directory';
+
+        const apiResponse = await axios.get(endpoint);
+        const data = apiResponse.data.result;
 
         res.render('public-directory', { 
-            title: 'Trader Directory',
-            traders: traders 
+            title: data.title,
+            traders: data.traders, 
         });
 
     } catch (err) {
-        console.error('Error fetching traders:', err);
-        res.status(500).send('Server Error.');
+        console.error("Network error: ", err.message);
+        return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
     }
 };
 
@@ -27,36 +28,22 @@ exports.getAllTraders = async (req, res) => {
 exports.getTraderProfile = async (req, res) => {
     
     try {
-        
         const traderId = req.params.id;
-
-        const tp_query = `
-        SELECT tp.*, u.full_name 
-        FROM trader_profiles tp 
-        LEFT JOIN users u ON tp.user_id = u.id 
-        WHERE tp.user_id = ?
-        `;
+        const endpoint = `http://localhost:3003/traders/${traderId}`;
         
-        const [traderResults] = await db.query(tp_query, [traderId]);
-        const trader = traderResults[0];
-
-        if (!trader) {
-            return res.status(404).send('Trader not found.');
-        }
-
-        const [services] = await db.query('SELECT * FROM services WHERE trader_user_id = ?', [traderId]);
+        const apiResponse = await axios.get(endpoint);
+        const data = apiResponse.data.result;
 
         res.render('public-trader-profile', {
-            title: `${trader.full_name} - Profile`,
-            trader: trader,
-            services: services,
+            title: data.title,
+            trader: data.trader,
+            services: data.services,
         })
 
     } catch (err) {
-        console.error(err);
-        res.status(500).send('Server Error.');
+        console.error("Network error: ", err.message);
+        return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
     }
-
 };
 
 // Get booking page
@@ -69,30 +56,20 @@ exports.getBookingPage = async (req, res) => {
         }
 
         const serviceId = req.params.id;
+        const endpoint = `http://localhost:3003/services/${serviceId}/book`;
 
-        const query = `
-            SELECT s.*, u.full_name as trader_name
-            FROM services s 
-            LEFT JOIN users u ON s.trader_user_id = u.id 
-            WHERE s.id = ?
-        `;
-
-        const [results] = await db.query(query, [serviceId]);
-        const service = results[0];
-
-        if (!service) {
-            return res.status(404).send('Service not found.');
-        }
+        const apiResponse = await axios.get(endpoint);
+        const data = apiResponse.data.result;
 
         res.render('public-book-service', {
-            title: 'Book Service',
-            service: service,
-            trader: {id: service.trader_user_id, name: service.trader_name},
+            title: data.title,
+            service: data.service,
+            trader: data.trader,
         })
             
     } catch (err) {
-        console.error(err);
-        res.status(500).send('Server Error.');
+        console.error("Network error: ", err.message);
+        return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
     }
 };
 
@@ -100,35 +77,27 @@ exports.getBookingPage = async (req, res) => {
 exports.createBooking = async (req, res) => {
     
     try {
-
         const serviceId = req.params.id;
+        const endpoint = `http://localhost:3003/services/${serviceId}/book`;
 
         let {client_user_id, client_name, client_email, job_date, job_start_time, job_description} = req.body;
         // converting to null again
         client_user_id = client_user_id === '' ? null : client_user_id;
 
-        const query = `
-        INSERT INTO bookings
-        (service_id, client_user_id, client_name, client_email, job_date, job_start_time, job_description, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending')
-        `;
-
-        await db.query(query, [serviceId, client_user_id, client_name, client_email, job_date, job_start_time, job_description]);
+        await axios.post(endpoint, {client_user_id, client_name, client_email, job_date, job_start_time, job_description});
 
         res.locals.successfulMessage = 'Booking Successful.';
-
         return exports.getBookingPage(req, res);
-
+    
     } catch (err) {
-        console.error(err);
-        res.status(500).send('Server Error.');
+        console.error("Network error: ", err.message);
+        return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
     }
-}
+};
 
 // Get register page
 exports.getRegisterPage = (req, res) => {
     
-
     try {
 
         if (!req.session.isloggedin || req.session.role === 'Admin') {
@@ -138,8 +107,8 @@ exports.getRegisterPage = (req, res) => {
         }
 
     } catch (err) {
-        console.error(err);
-        res.status(500).send('Server Error.');
+        console.error("Network error: ", err.message);
+        return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
     }
 };
 
@@ -148,16 +117,10 @@ exports.postRegisterPage = async (req, res) => {
 
 
     try {
-
         const { useremail, userpass, username, userfullname, userrole } = req.body;
+        const endpoint = `http://localhost:3003/register`;
 
-        const query = `
-        INSERT INTO users
-        (username, email, full_name, password_hash, role)
-        VALUES (?, ?, ?, ?, ?)
-        `;
-
-        await db.query(query, [username, useremail, userfullname, userpass, userrole])
+        await axios.post(endpoint, { useremail, userpass, username, userfullname, userrole });
 
         req.session.message = {
         type: 'is-success',
