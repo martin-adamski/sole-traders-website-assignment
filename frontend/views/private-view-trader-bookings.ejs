@@ -1,54 +1,49 @@
 <%- include('partials/header') %>
 
 <h1>Bookings</h1>
-<p><%= bookingsConfirmed.length %> bookings confirmed</p>
-<p><%= bookingsPending.length %> bookings pending</p>
 
-<% if ((bookingsConfirmed.length === 0) && (bookingsPending.length === 0)) { %>
-    <h3>No bookings found.</h3>
+<form action="/view-bookings" method="GET">
+    <label>Booking Status</label>
+    <select name="status">
+        <option value="Pending" <%= currentFilter === 'Pending' ? 'selected' : '' %>>Pending</option>
+        <option value="Confirmed" <%= currentFilter === 'Confirmed' ? 'selected' : '' %>>Confirmed</option>
+        <option value="Rejected" <%= currentFilter === 'Rejected' ? 'selected' : '' %>>Rejected</option>
+    </select>
+    <button type="submit">Apply Filter</button>
+</form>
+
+<h3><%= currentFilter %> Bookings:</h3>
+<% if (bookings.length === 0) { %>
+    <p>No <%= currentFilter %> bookings found.</p>
 <% } else { %>
+     <ul>
+        <% bookings.forEach(booking => { %>
+            <li>
+                <p>Service Name: <%= booking.service_name %></p>
+                <p>Service Description: <%= booking.service_description %></p>
+                <p>Client Description: <%= booking.client_description %></p>
+                <p>Job Date: <%= booking.job_date %></p>
+                <p>Job Start Time: <%= booking.job_start_time %></p>
+                <p>Price Type: <%= booking.price_type %></p>
+                <p>Base Price: <%= booking.base_price %></p>
+            </li>
 
-    <h3>Pending Bookings:</h3>
-    <% if (bookingsPending.length === 0) { %>
-        <p>No pending bookings found.</p>
-    <% } else { %>
-        <ul>
-            <% bookingsPending.forEach(booking => { %>
-                <li>
-                    <p>Service Name: <%= booking.service_name %></p>
-                    <p>Service Description: <%= booking.service_description %></p>
-                    <p>Client Description: <%= booking.client_description %></p>
-                    <p>Job Date: <%= booking.job_date %></p>
-                    <p>Job Start Time: <%= booking.job_start_time %></p>
-                    <p>Price Type: <%= booking.price_type %></p>
-                    <p>Base Price: <%= booking.base_price %></p>
-                
-            <!-- Got to add confirm / reject buttons -->
-                </li>
-                <br>
-            <% }); %>
-        </ul>
-    <% } %>
+            <% if (currentFilter === 'Pending') { %>
+            <form action="/update-booking" method="POST">
+                <input type="hidden" name="bookingId" value="<%= booking.booking_id %>">
+                <input type="hidden" name="newStatus" value="Confirmed">
 
-    <h3>Confirmed Bookings:</h3>
-    <% if (bookingsConfirmed.length === 0) { %>
-        <p>No confirmed bookings found.</p>
-    <% } else { %>
-        <ul>
-            <% bookingsConfirmed.forEach(booking => { %>
-                <li>
-                    <p>Service Name: <%= booking.service_name %></p>
-                    <p>Service Description: <%= booking.service_description %></p>
-                    <p>Client Description: <%= booking.client_description %></p>
-                    <p>Job Date: <%= booking.job_date %></p>
-                    <p>Job Start Time: <%= booking.job_start_time %></p>
-                    <p>Price Type: <%= booking.price_type %></p>
-                    <p>Base Price: <%= booking.base_price %></p>
-                </li>
-                <br>
-            <% }); %>
-        </ul>
-    <% } %>
-<% } %>
+                <button type="submit">Confirm</button>
+            </form>
 
-<%- include('partials/footer') %>
+            <form action="/update-booking" method="POST">
+                <input type="hidden" name="bookingId" value="<%= booking.booking_id %>">
+                <input type="hidden" name="newStatus" value="Rejected">
+
+                <button type="submit">Reject</button>
+            </form>
+            <% } %>
+            <br>
+        <% }); %>
+    </ul>
+ <% } %>

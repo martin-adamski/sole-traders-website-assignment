@@ -163,6 +163,7 @@ exports.getViewTraderBookingsPage = async (req, res) => {
 
     try {
         const traderId = req.params.id;
+        const queryStatus = req.query.status;
 
         if (!traderId) {
             return res.status(401).json({
@@ -171,7 +172,7 @@ exports.getViewTraderBookingsPage = async (req, res) => {
             });
         };
 
-        const queryConfirmed = `
+        const query = `
         SELECT
         b.id as booking_id
         , s.title as service_name
@@ -189,39 +190,51 @@ exports.getViewTraderBookingsPage = async (req, res) => {
         INNER JOIN users u
             on u.id = s.trader_user_id
                 AND u.id = ?
-        WHERE b.status = 'Confirmed'
+        WHERE b.status = ?
+        ORDER BY b.job_date DESC
             `;
 
-        const queryPending = `
-        SELECT
-        b.id as booking_id
-        , s.title as service_name
-        , s.description as service_description
-        , b.job_description as client_description
-        , b.job_date
-        , b.job_start_time
-        , b.status as job_status
-        , s.price_type
-        , s.base_price
-        , u.id as trader_user_id
-        FROM bookings b
-        INNER JOIN services s
-            on b.service_id = s.id
-        INNER JOIN users u
-            on u.id = s.trader_user_id
-                AND u.id = ?
-        WHERE b.status = 'Pending'
-            `;
-
-        const [bookingsConfirmed] = await db.query(queryConfirmed, [traderId]);
-        const [bookingsPending] = await db.query(queryPending, [traderId]);
+        const [bookings] = await db.query(query, [traderId, queryStatus]);
 
         return res.status(200).json({
             status: 'success',
             result: {
-                confirmed: bookingsConfirmed,
-                pending: bookingsPending
+                bookings: bookings,
             }
+        });
+
+    } catch (err) {
+        console.error("API Error: ", err);
+        return res.status(500).json({
+            status: 'error',
+            message: 'Server error'
+        });
+    };
+};
+
+// Patch booking status
+exports.patchBookingStatus = async(req, res) => {
+    
+    try {
+        const bookingId = req.params.id;
+        const { newStatus } = req.body;
+
+        if (!bookingId) {
+            return res.status(401).json({
+                status: 'failure',
+                message: 'Booking ID is required'
+            });
+        };
+
+        const query = `
+        UPDATE bookings SET status = ? WHERE id = ?
+        `;
+
+        await db.query(query, [newStatus, bookingId]);
+    
+        return res.status(200).json({
+            status: 'success',
+            message: 'Booking updated successfully'
         });
 
     } catch (err) {

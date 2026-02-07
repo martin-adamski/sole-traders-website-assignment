@@ -13,4 +13,6 @@ router.get('/view-profile', privateController.getViewProfilePage);
 
 router.get('/view-bookings', privateController.getViewTraderBookingsPage);
 
+router.post('/update-booking', privateController.postBookingStatus);
+
 module.exports = router;

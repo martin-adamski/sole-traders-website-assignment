@@ -161,19 +161,39 @@ exports.getViewTraderBookingsPage = async (req, res) => {
         if ((req.session.user?.role === 'Trader' || req.session.user?.role === 'Admin')) {
 
             const traderId = req.session.user.id;
+            const queryStatus = req.query.status || 'Pending';
+
             const endpoint = `http://localhost:3003/view-bookings/${traderId}`;
 
-            const apiResponse = await axios.get(endpoint);
-            const data = apiResponse.data.result;
+            const apiResponse = await axios.get(endpoint, { params : { status : queryStatus }});
 
             res.render('private-view-trader-bookings', {
-                trader_id: traderId,   
-                bookingsConfirmed: data.confirmed,    
-                bookingsPending: data.pending,    
+                traderId: traderId,   
+                bookings: apiResponse.data.result.bookings,
+                currentFilter: queryStatus,      
             }); 
         } else {
             return res.redirect('/');
         }
+
+    } catch (err) {
+        console.error("Network error: ", err.message);
+        return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
+    }
+};
+
+
+// Get view bookings page
+exports.postBookingStatus = async (req, res) => {
+
+    try {
+        const { bookingId, newStatus } = req.body;
+        
+        const endpoint = `http://localhost:3003/update-booking/${bookingId}`;
+
+        const apiResponse = await axios.patch(endpoint, { newStatus : newStatus });
+
+        return res.redirect('/view-bookings');
 
     } catch (err) {
         console.error("Network error: ", err.message);
