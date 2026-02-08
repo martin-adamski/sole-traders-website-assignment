@@ -8,14 +8,24 @@ exports.getHomePage = (req, res) => {
 // Get all traders
 exports.getAllTraders = async (req, res) => {
     try {
+        const selectedType = req.query.tradeTypeChoice || 'All';
+        const selectedRegion = req.query.regionChoice || 'All';
+
         const endpoint = 'http://localhost:3003/directory';
 
-        const apiResponse = await axios.get(endpoint);
+        const apiResponse = await axios.get(endpoint, { params : { type: selectedType, region: selectedRegion } });
         const data = apiResponse.data.result;
 
         res.render('public-directory', { 
             title: data.title,
             traders: data.traders, 
+            types: data.types,
+            regions: data.regions,
+            currentFilter: {
+                type: selectedType,
+                region: selectedRegion,
+            }
+
         });
 
     } catch (err) {

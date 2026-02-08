@@ -3,6 +3,32 @@
 <h1><%= title %></h1>
 <p><%= traders.length %> active traders</p>
 
+<form action="/directory" method="GET">
+    <label>Trade Type</label>
+    <select name="tradeTypeChoice">
+        <% types.forEach( type => { %>
+            <option value="<%= type %>" <%= currentFilter.type === type ? 'selected' : '' %>>
+                <%= type %>
+            </option>
+        <% }) %>
+    </select>
+
+    <label>Region</label>
+    <select name="regionChoice">
+        <% regions.forEach( region => { %>
+            <option value="<%= region %>" <%= currentFilter.region === region ? 'selected' : '' %>>
+                <%= region %>
+            </option>
+         <% }) %>
+    </select>
+
+    <button type="submit">Apply Filters</button>
+</form>
+
+<form action="/directory" method="GET">
+    <button type="submit">Reset Filters</button>
+</form>
+
 <% if (traders.length === 0) { %>
     <p>No traders found.</p>
 <% } else { %>

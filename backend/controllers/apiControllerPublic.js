@@ -1,15 +1,44 @@
 const db = require('../config/dbconnection');
 
+// Hardcoded consts variables to use for directory filters
+const ALLOWED_TRADES = ['Plumber', 'Electrician', 'Carpenter', 'Builder', 'Gardener'];
+const ALLOWED_REGIONS = ['London', 'Cardiff', 'Manchester', 'Birmingham', 'Leeds'];
+
 // Get all traders
 exports.getAllTraders = async (req, res) => {
     try {
-        const [traders] = await db.query('SELECT tp.*, u.full_name FROM trader_profiles tp LEFT JOIN users u ON tp.user_id = u.id');
+        const { type, region } = req.query;
+
+        let query =
+        `SELECT 
+        tp.*
+        , u.full_name 
+        FROM trader_profiles tp 
+        LEFT JOIN users u 
+        ON tp.user_id = u.id
+        WHERE 1=1`;
+
+        const params = [];
+
+        if (type && type !== 'All') {
+            query += ' AND trade_type = ?';
+            params.push(type);
+        }
+
+        if (region && region !== 'All') {
+            query += ' AND region = ?';
+            params.push(region)
+        }
+
+        const [traders] = await db.query(query, [type, region]);
 
         return res.status(200).json({
             status: 'success',
             result: {
                 title: 'Trader Directory',
-                traders: traders
+                traders: traders,
+                types: ALLOWED_TRADES,
+                regions: ALLOWED_REGIONS,
             }
         });
 
