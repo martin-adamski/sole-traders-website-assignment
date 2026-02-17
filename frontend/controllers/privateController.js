@@ -1,4 +1,5 @@
 const axios = require('axios');
+const { end } = require('../config/dbconnection');
 
 // Get login page
 exports.getLoginPage = (req, res) => {
@@ -101,7 +102,7 @@ exports.postEditProfilePage = async (req, res) => {
         req.session.message = {
         type: 'is-success',
         text: 'Your profile has been edited succesfully.',
-    };
+        };
         
         // Forcing the session save to display the message
         req.session.save(err => {
@@ -194,6 +195,160 @@ exports.postBookingStatus = async (req, res) => {
         const apiResponse = await axios.patch(endpoint, { newStatus : newStatus });
 
         return res.redirect('/view-bookings');
+
+    } catch (err) {
+        console.error("Network error: ", err.message);
+        return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
+    }
+};
+
+// Get view trader services
+exports.getViewTraderServices = async (req, res) => {
+
+    try { 
+        if ((req.session.user?.role === 'Trader' || req.session.user?.role === 'Admin')) {
+
+            const traderId = req.session.user.id;
+            const endpoint = `http://localhost:3003/view-services/${traderId}`;
+
+            const apiResponse = await axios.get(endpoint);
+            const data = apiResponse.data.result;
+
+            return res.render('private-view-trader-services', {
+                services: data.services,    
+            }); 
+        } else {
+            return res.redirect('/');
+        }
+    } catch (err) {
+        console.error("Network error: ", err.message);
+        return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
+    }
+};
+
+// Get edit trader service
+exports.getEditTraderService = async (req, res) => {
+
+    try {
+
+        if ((req.session.user?.role === 'Trader' || req.session.user?.role === 'Admin')) {
+
+            const traderId = req.session.user.id;
+            const serviceId = req.params.id;
+            const endpoint = `http://localhost:3003/edit-service/${serviceId}`;
+
+            const apiResponse = await axios.get(endpoint, { params : { traderId : traderId }});
+            const data = apiResponse.data.result;
+
+            return res.render('private-edit-trader-service', {
+                serviceId : serviceId,
+                traderId : traderId,
+                service : data.service,
+            })
+        
+        } else {
+            return res.redirect('/');
+        }   
+
+    } catch (err) {
+        console.error("Network error: ", err.message);
+        return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
+    }
+};
+
+// Post edit trader service
+exports.postEditTraderService = async (req, res) => {
+
+    try {
+        if ((req.session.user?.role === 'Trader' || req.session.user?.role === 'Admin')) {
+
+            const { title, description, base_price, price_type } = req.body;
+            const traderId = req.session.user.id;
+            const serviceId = req.params.id;
+            const endpoint = `http://localhost:3003/edit-service/${serviceId}`;
+
+            const apiResponse = await axios.post(endpoint, { serviceId, traderId, title, description, base_price, price_type });
+            const data = apiResponse.data.result;
+
+            req.session.message = {
+                type: 'is-success',
+                text: 'Your service has been edited succesfully.',
+            };
+        
+            // Forcing the session save to display the message
+            req.session.save(err => {
+                if (err) {
+                    console.error(err);
+                    return res.status(500).send('Session save error');
+                }
+                return res.redirect(`/edit-service/${serviceId}`);
+            });
+
+        } else {
+            return res.redirect('/');
+        }   
+
+    } catch (err) {
+        console.error("Network error: ", err.message);
+        return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
+    }
+};
+
+// Get add trader service
+exports.getAddTraderService = async (req, res) => {
+
+    try {
+
+        if ((req.session.user?.role === 'Trader' || req.session.user?.role === 'Admin')) {
+
+            const traderId = req.session.user.id;
+
+            return res.render('private-add-trader-service', {
+                traderId : traderId,
+            })
+        
+        } else {
+            return res.redirect('/');
+        }   
+
+    } catch (err) {
+        console.error("Network error: ", err.message);
+        return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
+    }
+};
+
+
+// Post add trader service
+exports.postAddTraderService = async (req, res) => {
+
+    try {
+
+        if ((req.session.user?.role === 'Trader' || req.session.user?.role === 'Admin')) {
+
+            const { title, description, base_price, price_type } = req.body;
+            const traderId = req.session.user.id;
+            const endpoint = `http://localhost:3003/add-service`;
+
+            const apiResponse = await axios.post(endpoint, { traderId, title, description, base_price, price_type });
+            const data = apiResponse.data.result;
+
+            req.session.message = {
+                type: 'is-success',
+                text: 'Your service has been added succesfully.',
+            };
+        
+            // Forcing the session save to display the message
+            req.session.save(err => {
+                if (err) {
+                    console.error(err);
+                    return res.status(500).send('Session save error');
+                }
+                return res.redirect(`/add-service/`);
+            });
+        
+        } else {
+            return res.redirect('/');
+        }   
 
     } catch (err) {
         console.error("Network error: ", err.message);

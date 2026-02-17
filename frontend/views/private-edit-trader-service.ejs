@@ -1,0 +1,45 @@
+<%- include('partials/header') %>
+
+<hr>
+
+<% if (locals.message) { %>
+    <p id="flash-msg" class="help <%= message.type %>" style="font-weight: bold; margin-bottom: 10px;">
+        <%= message.text %>
+    </p>
+<% } %>
+
+<h1>Edit Service</h1>
+
+<form action="/edit-service/<%= serviceId %>" method="POST">
+
+    <input type="hidden" name="trader_id" value="<%= traderId %>">
+
+    <div>
+        <label for="stitle">Title:</label>
+        <input type="text" name="title" id="stitle" value="<%= service.title %>" required>
+    </div>
+
+    <div>
+        <label for="sdescription">Description:</label>
+        <textarea name="description" id="sdescription" rows="4" required><%= service.description %></textarea>
+    </div>
+    
+    <div>
+        <label for="sbase_price">Base Price:</label>
+        <input type="number" name="base_price" id="sbase_price" step="0.01" value="<%= service.base_price %>" required>
+    </div>
+    
+    <div>
+        <label for="sprice_type">Booking Status</label>
+        <select name="price_type" id="sprice_type" required>
+            <option value="Fixed" <%= service.price_type === 'Fixed' ? 'selected' : '' %>>Fixed</option>
+            <option value="Hourly" <%= service.price_type === 'Hourly' ? 'selected' : '' %>>Hourly</option>
+        </select>
+    </div>
+
+    <button type="submit">Confirm</button>
+</form>
+
+<a href="/view-services/">Cancel</a>
+
+<%- include('partials/footer') %>

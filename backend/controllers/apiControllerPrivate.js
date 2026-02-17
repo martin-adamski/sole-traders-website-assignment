@@ -7,7 +7,7 @@ exports.postLogin = async (req, res) => {
         const { username, userpass } = req.body;
 
         if (!username || !userpass) {
-            return res.status(400).json({
+            return res.status(401).json({
                 status: 'failure',
                 message: 'Username and password are required'
             });
@@ -235,6 +235,185 @@ exports.patchBookingStatus = async(req, res) => {
         return res.status(200).json({
             status: 'success',
             message: 'Booking updated successfully'
+        });
+
+    } catch (err) {
+        console.error("API Error: ", err);
+        return res.status(500).json({
+            status: 'error',
+            message: 'Server error'
+        });
+    };
+};
+
+// Get view trader
+exports.getViewTraderServices = async (req, res) => {
+
+    try {
+        const traderId = req.params.id;
+
+        if (!traderId) {
+            return res.status(401).json({
+                status: 'failure',
+                message: 'Trader ID is required'
+            });
+        };
+
+        const query = `
+        SELECT *
+        FROM services s
+        WHERE s.trader_user_id = ?
+        `;
+        
+        const [rows] = await db.query(query, [traderId]);
+
+        if (rows.length === 0) {
+            return res.status(401).json({
+                stauts: 'failure',
+                message: 'User not found'
+            });
+        };
+        
+        return res.status(200).json({
+            status: 'success',
+            result: {
+                services: rows
+            }
+        });
+
+    } catch (err) {
+        console.error("API Error: ", err);
+        return res.status(500).json({
+            status: 'error',
+            message: 'Server error'
+        });
+    };
+};
+
+// Get edit trader service
+exports.getEditTraderService = async (req, res) => {
+  
+        try {
+
+        const serviceId = req.params.id;
+        const traderId = req.query.traderId;
+
+        if (!serviceId) {
+            return res.status(401).json({
+                status: 'failure',
+                message: 'Service ID is required'
+            });
+        };
+
+        if (!traderId) {
+            return res.status(401).json({
+                status: 'failure',
+                message: 'Trader ID is required'
+            });
+        };
+
+        const query = `
+        SELECT *
+        FROM services s
+        WHERE 1=1 
+            AND s.id = ?
+            AND s.trader_user_id = ?
+        `;
+        
+        const [rows] = await db.query(query, [serviceId, traderId]);
+
+        if (rows.length === 0) {
+            return res.status(401).json({
+                stauts: 'failure',
+                message: 'Service not found'
+            });
+        };
+        
+        return res.status(200).json({
+            status: 'success',
+            result: {
+                service: rows[0]
+            }
+        });
+
+    } catch (err) {
+        console.error("API Error: ", err);
+        return res.status(500).json({
+            status: 'error',
+            message: 'Server error'
+        });
+    };
+};
+
+// Post edit trader service
+exports.postEditTraderService = async (req, res) => {
+
+    try {
+
+        const { serviceId, traderId, title, description, base_price, price_type } = req.body;
+
+        if (!serviceId) {
+            return res.status(400).json({
+                status: 'failure',
+                message: 'Service ID is required'
+            });
+        };
+
+        if (!traderId) {
+            return res.status(400).json({
+                status: 'failure',
+                message: 'Trader ID is required'
+            });
+        };
+
+        query =
+        `
+        UPDATE services
+        set title = ?, description = ?, base_price = ?, price_type = ?
+        where 1=1
+            AND id = ?
+            AND trader_user_id = ?
+        `;
+
+        await db.query(query, [title, description, base_price, price_type, serviceId, traderId]);
+    
+        return res.status(200).json({
+            status: 'success',
+            message: 'Service saved successfully'
+        });
+
+    } catch (err) {
+        console.error("API Error: ", err);
+        return res.status(500).json({
+            status: 'error',
+            message: 'Server error'
+        });
+    };
+};
+
+// Get add trader service
+exports.postAddTraderService = async (req, res) => {
+    try {
+        const { traderId, title, description, base_price, price_type } = req.body;
+
+        if (!traderId) {
+            return res.status(400).json({
+                status: 'failure',
+                message: 'Tradeer ID is required'
+            });
+        };
+
+        const query = `
+        INSERT INTO services
+        (trader_user_id, title, description, base_price, price_type)
+        VALUES (?, ?, ?, ?, ?)
+        `;
+
+        await db.query(query, [traderId, title, description, base_price, price_type]);
+    
+        return res.status(200).json({
+            status: 'success',
+            message: 'Service added successfully'
         });
 
     } catch (err) {

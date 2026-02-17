@@ -1,0 +1,45 @@
+<%- include('partials/header') %>
+
+<hr>
+
+<% if (locals.message) { %>
+    <p id="flash-msg" class="help <%= message.type %>" style="font-weight: bold; margin-bottom: 10px;">
+        <%= message.text %>
+    </p>
+<% } %>
+
+<h1>Add Service</h1>
+
+<form action="/add-service" method="POST">
+
+    <input type="hidden" name="trader_id" value="<%= traderId %>">
+
+    <div>
+        <label for="stitle">Title:</label>
+        <input type="text" name="title" id="stitle" required>
+    </div>
+
+    <div>
+        <label for="sdescription">Description:</label>
+        <textarea name="description" id="sdescription" rows="4" required></textarea>
+    </div>
+    
+    <div>
+        <label for="sbase_price">Base Price:</label>
+        <input type="number" name="base_price" id="sbase_price" step="0.01" required>
+    </div>
+    
+    <div>
+        <label for="sprice_type">Booking Status</label>
+        <select name="price_type" id="sprice_type" required>
+            <option value="Fixed" selected>Fixed</option>
+            <option value="Hourly">Hourly</option>
+        </select>
+    </div>
+
+    <button type="submit">Confirm</button>
+</form>
+
+<a href="/view-services/">Cancel</a>
+
+<%- include('partials/footer') %>
