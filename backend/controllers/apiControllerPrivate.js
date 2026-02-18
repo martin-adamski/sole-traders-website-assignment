@@ -424,3 +424,46 @@ exports.postAddTraderService = async (req, res) => {
         });
     };
 };
+
+// Delete delete trader service
+exports.deleteDeleteTraderService = async (req, res) => {
+
+        try {
+
+        const serviceId = req.params.id;
+        const traderId = req.body.traderId;
+
+        if (!serviceId) {
+            return res.status(401).json({
+                status: 'failure',
+                message: 'Service ID is required'
+            });
+        };
+
+        if (!traderId) {
+            return res.status(401).json({
+                status: 'failure',
+                message: 'Trader ID is required'
+            });
+        };
+
+        const query = `
+        DELETE FROM services
+        WHERE id = ? AND trader_user_id = ?
+        `;
+
+        await db.query(query, [serviceId, traderId]);
+
+        return res.status(200).json({
+            status: 'success',
+            message: 'Service deleted successfully'
+        });
+
+    } catch (err) {
+        console.error("API Error: ", err);
+        return res.status(500).json({
+            status: 'error',
+            message: 'Server error'
+        });
+    };
+};

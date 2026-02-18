@@ -1,5 +1,13 @@
 <%- include('partials/header') %>
 
+<hr>
+
+<% if (locals.message) { %>
+    <p id="flash-msg" class="help <%= message.type %>" style="font-weight: bold; margin-bottom: 10px;">
+        <%= message.text %>
+    </p>
+<% } %>
+
 <h1>Manage Services</h1>
 <a href="/add-service/">Add Service</a>
 
@@ -16,6 +24,10 @@
             </li>
 
             <a href="/edit-service/<%= service.id %>">Edit Service</a>
+            
+            <form action="/delete-service/<%= service.id %>" method="POST" onsubmit="return confirm('Are you sure you want to delete the service')">
+                <button type="submit">Delete Service</button>
+            </form>
 
             <br>
         <% }); %>

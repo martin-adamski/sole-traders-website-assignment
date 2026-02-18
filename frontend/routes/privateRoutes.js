@@ -19,6 +19,7 @@ router.get('/edit-service/:id', privateController.getEditTraderService);
 router.post('/edit-service/:id', privateController.postEditTraderService);
 router.get('/add-service/', privateController.getAddTraderService);
 router.post('/add-service/', privateController.postAddTraderService);
+router.post('/delete-service/:id', privateController.postDeleteTraderService);
 
 
 module.exports = router;

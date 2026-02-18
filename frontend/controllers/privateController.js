@@ -355,3 +355,41 @@ exports.postAddTraderService = async (req, res) => {
         return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
     }
 };
+
+// Post delete trader service
+exports.postDeleteTraderService = async (req, res) => {
+    
+    try {
+
+        if ((req.session.user?.role === 'Trader' || req.session.user?.role === 'Admin')) {
+
+            const traderId = req.session.user.id;
+            const serviceId = req.params.id;
+            const endpoint = `http://localhost:3003/delete-service/${serviceId}`;
+
+            const apiResponse = await axios.delete(endpoint, { data : { traderId : traderId }});
+            const data = apiResponse.data.result;
+
+            req.session.message = {
+                type: 'is-success',
+                text: 'Your service has been deleted succesfully.',
+            };
+        
+            // Forcing the session save to display the message
+            req.session.save(err => {
+                if (err) {
+                    console.error(err);
+                    return res.status(500).send('Session save error');
+                }
+                return res.redirect(`/view-services/`);
+            });
+
+        } else {
+            return res.redirect('/');
+        }   
+
+    } catch (err) {
+        console.error("Network error: ", err.message);
+        return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
+    }
+};
