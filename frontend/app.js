@@ -1,13 +1,10 @@
-require('dotenv').config({path: './config.env'}); // Environment variables
+require('dotenv').config(); // Environment variables
 const express = require('express');
 const morgan = require('morgan');
 const path = require('path');
 
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
-
-// Import Database Check
-const db = require('./config/dbconnection');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -58,11 +55,7 @@ app.use('/', privateRoutes);
 // 4. Server Start
 // DB connection test before starting the server
 const startServer = async () => {
-    try {
-        // Simple query to test DB connection
-        // await db.query('SELECT 1');
-        // console.log('Database connected successfully');
-        
+    try {        
         app.listen(PORT, () => {
             console.log(`Server running at http://localhost:${PORT}`);
         });

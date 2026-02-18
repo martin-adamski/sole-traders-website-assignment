@@ -155,10 +155,26 @@ exports.createBooking = async (req, res) => {
         const query = `
         INSERT INTO bookings
         (service_id, client_user_id, client_name, client_email, job_date, job_start_time, job_description, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending')
+        SELECT ?, ?, ?, ?, ?, ?, ?, 'Pending'
+        FROM DUAL
+        WHERE EXISTS (
+            SELECT 1 FROM services s
+            INNER JOIN trader_availability ta
+                ON s.trader_user_id = ta.trader_user_id
+                AND DAYNAME(?) = ta.day_of_week
+                AND ? between ta.start_time and ta.end_time
+            WHERE s.id = ?
+        )
         `;
 
-        await db.query(query, [serviceId, client_user_id, client_name, client_email, job_date, job_start_time, job_description]);
+        const [result] = await db.query(query, [serviceId, client_user_id, client_name, client_email, job_date, job_start_time, job_description, job_date, job_start_time, serviceId]);
+
+        if (result.affectedRows === 0) {
+            return res.status(409).json({
+                status: 'error',
+                message: 'Booking failed: trader not available at selected date and time. Check trader availability.'
+            });
+        };
 
         return res.status(200).json({
             status: 'success',
@@ -171,7 +187,7 @@ exports.createBooking = async (req, res) => {
             status: 'error',
             message: 'Server error'
         });
-    };
+    }
 };
 
 // Post register page

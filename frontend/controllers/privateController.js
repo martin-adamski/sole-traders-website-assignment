@@ -1,5 +1,4 @@
 const axios = require('axios');
-const { end } = require('../config/dbconnection');
 
 // Get login page
 exports.getLoginPage = (req, res) => {

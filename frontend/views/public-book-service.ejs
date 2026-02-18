@@ -12,6 +12,12 @@
     </p>
 <% } %>
 
+<% if (locals.errorMessage) { %>
+    <p id="error-msg" class="help is-danger" style="font-weight: bold; margin-bottom: 10px;">
+        <%= errorMessage %>
+    </p>
+<% } %>
+
 <form action="/services/<%= service.id %>/book" method="POST">
     <input type="hidden" name="trader_id" value="<%= trader.id %>">
     <input type="hidden" name="client_user_id" value="<%= user.id %>">
@@ -28,7 +34,7 @@
     
     <div>
         <label for="date">Date:</label>
-        <input type="date" name="job_date" id="date" required>
+        <input type="date" name="job_date" id="date" min="2026-01-01" max="2028-01-01"required>
     </div>
     
     <div>

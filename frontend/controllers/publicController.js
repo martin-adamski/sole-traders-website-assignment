@@ -100,6 +100,12 @@ exports.createBooking = async (req, res) => {
         return exports.getBookingPage(req, res);
     
     } catch (err) {
+
+        if (err.status === 409) {
+            res.locals.errorMessage = `${err.response.data.message}`;
+            return exports.getBookingPage(req, res);
+        }
+
         console.error("Network error: ", err.message);
         return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
     }
