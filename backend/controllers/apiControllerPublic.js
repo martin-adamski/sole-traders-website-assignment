@@ -145,12 +145,29 @@ exports.getBookingPage = async (req, res) => {
     };
 };
 
-// Create booking / send to database
-exports.createBooking = async (req, res) => {
+// Post create booking / send to database
+exports.postCreateBooking = async (req, res) => {
     
     try {
         const serviceId = req.params.id;
         const {client_user_id, client_name, client_email, job_date, job_start_time, job_description} = req.body;
+
+        const checkQuery = `
+        select * from bookings
+        where service_id = ?
+            AND date(job_date) = ?
+            AND time(job_start_time) = ?
+            AND status = 'Confirmed'
+        `;
+
+        const [check] = await db.query(checkQuery, [serviceId, job_date, job_start_time]);
+
+        if (check.length > 0) {
+            return res.status(409).json({
+                status: 'error',
+                message: 'Booking failed: time slot already taken. Try other times or dates.'
+            });
+        };
 
         const query = `
         INSERT INTO bookings

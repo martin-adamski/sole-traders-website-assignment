@@ -523,7 +523,6 @@ exports.getEditTraderAvailability = async (req, res) => {
 exports.postEditTraderAvailability = async (req, res) => {
 
     try {
-
         const traderId = req.params.id;
         const { availability } = req.body;
 
