@@ -392,3 +392,83 @@ exports.postDeleteTraderService = async (req, res) => {
         return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
     }
 };
+
+exports.getEditTraderAvailability = async (req, res) => {
+    
+    try {
+        if ((req.session.user?.role === 'Trader' || req.session.user?.role === 'Admin')) {
+            
+            const traderId = req.session.user.id;
+            const endpoint = `http://localhost:3003/edit-availability/${traderId}`;
+
+            const apiResponse = await axios.get(endpoint);
+            const data = apiResponse.data.result;
+
+            const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            const safe_days = {};
+
+            for (const day of daysOfWeek) {
+                safe_days[day] = {
+                    start_time: data[day]?.start_time || '09:00',
+                    end_time: data[day]?.end_time || '17:00',
+                    selected: data[day]?.selected || 'No',
+                };
+            }
+
+            res.render('private-edit-trader-availability', {
+                trader_id: traderId,
+                days: safe_days,    
+            }); 
+        } else {
+            return res.redirect('/');
+        }
+
+    } catch (err) {
+        console.error("Network error: ", err.message);
+        return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
+    }
+};
+
+exports.postEditTraderAvailability = async (req, res) => {
+    
+    try {
+        if ((req.session.user?.role === 'Trader' || req.session.user?.role === 'Admin')) {
+            
+            const traderId = req.session.user.id;
+            const endpoint = `http://localhost:3003/edit-availability/${traderId}`;
+
+            const availabilityData = [];
+            const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
+            for (const day of daysOfWeek) {
+                availabilityData.push({
+                    day_of_week: day.charAt(0).toUpperCase() + day.slice(1), 
+                    start_time: req.body[`${day}1`],
+                    end_time: req.body[`${day}2`],
+                    selected: req.body[`${day}3`]
+                });
+            }
+
+            await axios.post(endpoint, { trader_id: traderId, availability: availabilityData });
+
+            req.session.message = {
+                type: 'is-success',
+                text: 'Your availability has been updated successfully.',
+            };
+        
+            req.session.save(err => {
+                if (err) {
+                    console.error(err);
+                    return res.status(500).send('Session save error');
+                }
+                return res.redirect('/edit-availability');
+            });
+        } else {
+            return res.redirect('/');
+        }
+
+    } catch (err) {
+        console.error("Network error: ", err.message);
+        return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
+    }
+};

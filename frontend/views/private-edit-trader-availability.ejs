@@ -1,0 +1,42 @@
+<%- include('partials/header') %>
+
+<hr>
+
+<% if (locals.message) { %>
+    <p id="flash-msg" class="help <%= message.type %>" style="font-weight: bold; margin-bottom: 10px;">
+        <%= message.text %>
+    </p>
+<% } %>
+
+<h1>Edit Trader Availability</h1>
+
+<form action="/edit-availability" method="POST">
+    <input type="hidden" name="trader_id" value="<%= trader_id %>">
+
+    <% const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']; %>
+
+    <% daysOfWeek.forEach(day => { %>
+        <% const displayDay = day.charAt(0).toUpperCase() + day.slice(1); %>
+        
+        <div>
+            <label><%= displayDay %></label>
+            
+            <label for="<%= day %>1">Start Time:</label>
+            <input type="time" name="<%= day %>1" id="<%= day %>1" value="<%= days[day].start_time %>" required>
+            
+            <label for="<%= day %>2">End Time:</label>
+            <input type="time" name="<%= day %>2" id="<%= day %>2" value="<%= days[day].end_time %>" required>
+            
+            <label for="<%= day %>3">Active:</label>
+            <select name="<%= day %>3" id="<%= day %>3" required>
+                <option value="Yes" <%= days[day].selected === 'Yes' ? 'selected' : '' %>>Yes</option>
+                <option value="No" <%= days[day].selected === 'No' ? 'selected' : '' %>>No</option>
+            </select>
+        </div>
+    <% }) %>
+
+    <button type="submit">Save Availability</button>
+
+</form>
+
+<%- include('partials/footer') %>

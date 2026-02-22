@@ -21,5 +21,7 @@ router.get('/add-service/', privateController.getAddTraderService);
 router.post('/add-service/', privateController.postAddTraderService);
 router.post('/delete-service/:id', privateController.postDeleteTraderService);
 
+router.get('/edit-availability', privateController.getEditTraderAvailability);
+router.post('/edit-availability', privateController.postEditTraderAvailability);
 
 module.exports = router;
