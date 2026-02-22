@@ -101,7 +101,7 @@ exports.createBooking = async (req, res) => {
     
     } catch (err) {
 
-        if (err.status === 409) {
+        if (err.status === 409 || err.response.status === 400) {
             res.locals.errorMessage = `${err.response.data.message}`;
             return exports.getBookingPage(req, res);
         }
@@ -144,7 +144,7 @@ exports.postRegisterPage = async (req, res) => {
     };
 
         // Forcing the session save to display the message
-        req.session.save(err => {
+        return req.session.save(err => {
             if (err) {
                 console.error(err);
                 return res.status(500).send('Session save error');
@@ -153,6 +153,24 @@ exports.postRegisterPage = async (req, res) => {
         });
 
     } catch (err) {
+
+        if (err.response && err.response.status === 400) {
+
+            req.session.message = {
+            type: 'is-danger',
+            text: `Registration unsuccessful: ${err.response.data.message}`,
+            };
+
+            // Forcing the session save to display the message
+            return req.session.save(err => {
+                if (err) {
+                    console.error(err);
+                    return res.status(500).send('Session save error');
+                }
+                return res.redirect('/login');
+            });
+        }
+
         console.error(err);
         res.status(500).send('Server Error.');
     }

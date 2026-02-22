@@ -1,4 +1,5 @@
 const db = require('../config/dbconnection');
+const { validateRegistration, validateBooking } = require('../utils/validation');
 
 // Hardcoded consts variables to use for directory filters
 const ALLOWED_TRADES = ['Plumber', 'Electrician', 'Carpenter', 'Builder', 'Gardener'];
@@ -149,12 +150,15 @@ exports.getBookingPage = async (req, res) => {
 exports.postCreateBooking = async (req, res) => {
     
     try {
+        const { isValid, errors } = validateBooking(req.body);
+        if (!isValid) return res.status(400).json({ status: 'error', message: errors.join(' ') });
+
         const serviceId = req.params.id;
         const {client_user_id, client_name, client_email, job_date, job_start_time, job_description} = req.body;
 
         const checkQuery = `
-        select * from bookings
-        where service_id = ?
+        SELECT * FROM bookings
+        WHERE service_id = ?
             AND date(job_date) = ?
             AND time(job_start_time) = ?
             AND status = 'Confirmed'
@@ -212,6 +216,9 @@ exports.postCreateBooking = async (req, res) => {
 exports.postRegisterPage = async (req, res) => {
 
     try {
+        const { isValid, errors } = validateRegistration(req.body);
+        if (!isValid) return res.status(400).json({ status: 'error', message: errors.join(' ') });
+
         const { useremail, userpass, username, userfullname, userrole } = req.body;
 
         const query = `

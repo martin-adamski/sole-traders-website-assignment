@@ -113,8 +113,26 @@ exports.postEditProfilePage = async (req, res) => {
         });
 
     } catch (err) {
-        console.error("Network error: ", err.message);
-        return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
+
+        if (err.response && err.response.status === 400) {
+
+            req.session.message = {
+            type: 'is-danger',
+            text: err.response.data.message,
+            };
+
+            // Forcing the session save to display the message
+            return req.session.save(err => {
+                if (err) {
+                    console.error(err);
+                    return res.status(500).send('Session save error');
+                }
+                return res.redirect('/edit-profile');
+            });
+        }
+
+        console.error(err);
+        res.status(500).send('Server Error.');
     }
 };
 
@@ -288,8 +306,26 @@ exports.postEditTraderService = async (req, res) => {
         }   
 
     } catch (err) {
-        console.error("Network error: ", err.message);
-        return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
+
+        if (err.response && err.response.status === 400) {
+
+            req.session.message = {
+            type: 'is-danger',
+            text: err.response.data.message,
+            };
+
+            // Forcing the session save to display the message
+            return req.session.save(err => {
+                if (err) {
+                    console.error(err);
+                    return res.status(500).send('Session save error');
+                }
+                return res.redirect(`/edit-service/${serviceId}`);
+            });
+        }
+        
+        console.error(err);
+        res.status(500).send('Server Error.');
     }
 };
 
@@ -350,8 +386,26 @@ exports.postAddTraderService = async (req, res) => {
         }   
 
     } catch (err) {
-        console.error("Network error: ", err.message);
-        return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
+
+        if (err.response && err.response.status === 400) {
+
+            req.session.message = {
+            type: 'is-danger',
+            text: err.response.data.message,
+            };
+
+            // Forcing the session save to display the message
+            return req.session.save(err => {
+                if (err) {
+                    console.error(err);
+                    return res.status(500).send('Session save error');
+                }
+                return res.redirect('/add-service');
+            });
+        }
+
+        console.error(err);
+        res.status(500).send('Server Error.');
     }
 };
 

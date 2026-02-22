@@ -1,4 +1,5 @@
 const db = require('../config/dbconnection');
+const { validateProfile, validateService } = require('../utils/validation');
 
 // Post login page
 exports.postLogin = async (req, res) => {
@@ -86,6 +87,9 @@ exports.getEditProfilePage = async (req, res) => {
 exports.postEditProfilePage = async (req, res) => {
 
     try {
+        const { isValid, errors } = validateProfile(req.body);
+        if (!isValid) return res.status(400).json({ status: 'error', message: errors.join(' ') });
+
         const { trader_id, trade_type, city, bio, availability } = req.body;
 
         if (!trader_id) {
@@ -293,10 +297,9 @@ exports.getViewTraderServices = async (req, res) => {
 // Get edit trader service
 exports.getEditTraderService = async (req, res) => {
   
-        try {
-
-        const serviceId = req.params.id;
-        const traderId = req.query.traderId;
+    try {
+            const serviceId = req.params.id;
+            const traderId = req.query.traderId;
 
         if (!serviceId) {
             return res.status(401).json({
@@ -349,6 +352,8 @@ exports.getEditTraderService = async (req, res) => {
 exports.postEditTraderService = async (req, res) => {
 
     try {
+        const { isValid, errors } = validateService(req.body);
+        if (!isValid) return res.status(400).json({ status: 'error', message: errors.join(' ') });
 
         const { serviceId, traderId, title, description, base_price, price_type } = req.body;
 
@@ -393,7 +398,11 @@ exports.postEditTraderService = async (req, res) => {
 
 // Get add trader service
 exports.postAddTraderService = async (req, res) => {
+    
     try {
+        const { isValid, errors } = validateService(req.body);
+        if (!isValid) return res.status(400).json({ status: 'error', message: errors.join(' ') });
+
         const { traderId, title, description, base_price, price_type } = req.body;
 
         if (!traderId) {
