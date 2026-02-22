@@ -163,6 +163,7 @@ exports.createBooking = async (req, res) => {
                 ON s.trader_user_id = ta.trader_user_id
                 AND DAYNAME(?) = ta.day_of_week
                 AND ? between ta.start_time and ta.end_time
+                AND ta.selected = 'Yes'
             WHERE s.id = ?
         )
         `;

@@ -467,3 +467,97 @@ exports.deleteDeleteTraderService = async (req, res) => {
         });
     };
 };
+
+exports.getEditTraderAvailability = async (req, res) => {
+
+    try {
+        const traderId = req.params.id;
+
+        if (!traderId) {
+            return res.status(401).json({
+                status: 'failure',
+                message: 'Trader ID is required'
+            });
+        };
+
+        const query = `
+        SELECT LOWER(day_of_week) AS day, start_time, end_time, selected
+        FROM trader_availability
+        WHERE trader_user_id = ?
+        `;
+
+        const [rows] = await db.query(query, [traderId]);
+
+        const availability = {
+            monday: {},
+            tuesday: {},
+            wednesday: {},
+            thursday: {},
+            friday: {},
+            saturday: {},
+            sunday: {}
+        };
+
+        rows.forEach(row => {
+            availability[row.day] = {
+                start_time: row.start_time,
+                end_time: row.end_time,
+                selected: row.selected
+            };
+        });
+
+        return res.status(200).json({
+            status: 'success',
+            result: availability
+        });
+
+    } catch (err) {
+        console.error("API Error: ", err);
+        return res.status(500).json({
+            status: 'error',
+            message: 'Server error'
+        });
+    };
+};
+
+exports.postEditTraderAvailability = async (req, res) => {
+
+    try {
+
+        const traderId = req.params.id;
+        const { availability } = req.body;
+
+        if (!traderId) {
+            return res.status(401).json({
+                status: 'failure',
+                message: 'Trader ID is required'
+            });
+        };
+
+        const query = `
+            INSERT INTO trader_availability 
+            (trader_user_id, day_of_week, start_time, end_time, selected)
+            VALUES (?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                start_time = VALUES(start_time),
+                end_time = VALUES(end_time),
+                selected = VALUES(selected)
+        `;
+
+        for (const day of availability) {
+            await db.query(query, [traderId, day.day_of_week, day.start_time, day.end_time, day.selected]);
+        };
+    
+        return res.status(200).json({
+            status: 'success',
+            message: 'Availability saved successfully'
+        });
+
+    } catch (err) {
+        console.error("API Error: ", err);
+        return res.status(500).json({
+            status: 'error',
+            message: 'Server error'
+        });
+    };
+};

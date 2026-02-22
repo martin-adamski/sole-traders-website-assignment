@@ -18,4 +18,7 @@ router.post('/edit-service/:id', apiControllerPrivate.postEditTraderService);
 router.post('/add-service', apiControllerPrivate.postAddTraderService);
 router.delete('/delete-service/:id', apiControllerPrivate.deleteDeleteTraderService);
 
+router.get('/edit-availability/:id', apiControllerPrivate.getEditTraderAvailability);
+router.post('/edit-availability/:id', apiControllerPrivate.postEditTraderAvailability);
+
 module.exports = router;
