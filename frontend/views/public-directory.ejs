@@ -37,6 +37,7 @@
             <li>
                 <h3><a href="/traders/<%= trader.user_id %>"><%= trader.full_name %></a></h3>
                 <p><%= trader.trade_type %> in <%= trader.region %></p>
+                <p>Average Rating: <%= trader.average_rating %></p>
             </li>
             <br>
         <% }); %>

@@ -2,10 +2,34 @@
 
 <a href="/directory">&larr; Back to Directory</a>
 
+<% if (locals.message) { %>
+    <p id="flash-msg" class="help <%= message.type %>" style="font-weight: bold; margin-bottom: 10px;">
+        <%= message.text %>
+    </p>
+<% } %>
+
 <h1><%= trader.full_name %></h1>
 <p><strong><%= trader.trade_type %></strong> in <%= trader.region %></p>
 
 <p><%= trader.bio %></p>
+<p>Average Rating: <%= trader.average_rating %></p>
+
+<form action="/submit-rating" method="POST">
+    <input type="hidden" name="traderId" value="<%= traderId %>">
+
+    <div>
+        <label for="rating">Rate Trader:</label>
+            <select name="rating" id="rating" required>
+            <option value="5">5</option>
+            <option value="4">4</option>
+            <option value="3">3</option>
+            <option value="2">2</option>
+            <option value="1">1</option>
+        </select>
+    </div>
+    
+    <button type="submit">Submit</button>
+</form>
 
 <hr>
 

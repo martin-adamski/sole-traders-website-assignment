@@ -19,6 +19,8 @@
      <ul>
         <% bookings.forEach(booking => { %>
             <li>
+                <p>Client Name: <%= booking.client_name %></p>
+                <p>Client Email: <%= booking.client_email %></p>
                 <p>Service Name: <%= booking.service_name %></p>
                 <p>Service Description: <%= booking.service_description %></p>
                 <p>Client Description: <%= booking.client_description %></p>

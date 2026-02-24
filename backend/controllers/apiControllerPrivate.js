@@ -179,6 +179,8 @@ exports.getViewTraderBookingsPage = async (req, res) => {
         const query = `
         SELECT
         b.id as booking_id
+        , b.client_name
+        , b.client_email
         , s.title as service_name
         , s.description as service_description
         , b.job_description as client_description
@@ -398,7 +400,7 @@ exports.postEditTraderService = async (req, res) => {
 
 // Get add trader service
 exports.postAddTraderService = async (req, res) => {
-    
+
     try {
         const { isValid, errors } = validateService(req.body);
         if (!isValid) return res.status(400).json({ status: 'error', message: errors.join(' ') });

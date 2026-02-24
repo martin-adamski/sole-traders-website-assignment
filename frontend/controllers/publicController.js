@@ -1,4 +1,5 @@
 const axios = require('axios');
+const { end } = require('../../backend/config/dbconnection');
 
 // Get home page
 exports.getHomePage = (req, res) => {
@@ -45,6 +46,7 @@ exports.getTraderProfile = async (req, res) => {
         const data = apiResponse.data.result;
 
         res.render('public-trader-profile', {
+            traderId: traderId,
             title: data.title,
             trader: data.trader,
             services: data.services,
@@ -175,6 +177,37 @@ exports.postRegisterPage = async (req, res) => {
         res.status(500).send('Server Error.');
     }
 };
+
+exports.postSubmitRating = async (req, res) => {
+
+    try {
+
+        const { traderId, rating } = req.body;
+        const endpoint = `http://localhost:3003/submit-rating`;
+
+        await axios.post(endpoint, { traderId, rating });
+
+        req.session.message = {
+            type: 'is-success',
+            text: 'Rating submitted successfully.',
+        };
+
+        // Forcing the session save to display the message
+        return req.session.save(err => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Session save error');
+            }
+            return res.redirect(`/traders/${traderId}`);
+        });
+
+    } catch {
+
+        console.error(err);
+        res.status(500).send('Server Error.');
+    }
+};
+
 
 // // get error page
 // exports.get404Page = (req, res) => {

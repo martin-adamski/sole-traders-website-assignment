@@ -13,11 +13,20 @@ exports.getAllTraders = async (req, res) => {
         let query =
         `SELECT 
         tp.*
-        , u.full_name 
+        , u.full_name
+        , r.average_rating
         FROM trader_profiles tp 
         LEFT JOIN users u 
-        ON tp.user_id = u.id
-        WHERE 1=1`;
+            ON tp.user_id = u.id
+        LEFT JOIN (
+	        SELECT 
+	        trader_user_id
+	        , ROUND(AVG(rating), 2) as average_rating
+	        FROM reviews
+	        GROUP BY trader_user_id
+        ) as r
+	    on tp.user_id = r.trader_user_id
+        WHERE 1=1`
 
         const params = [];
 
@@ -66,10 +75,22 @@ exports.getTraderProfile = async (req, res) => {
         };
 
         const tp_query = `
-        SELECT tp.*, u.full_name 
+        SELECT 
+        tp.*
+        , u.full_name
+        , r.average_rating
         FROM trader_profiles tp 
-        LEFT JOIN users u ON tp.user_id = u.id 
-        WHERE tp.user_id = ?
+        LEFT JOIN users u 
+            ON tp.user_id = u.id
+        LEFT JOIN (
+	        SELECT 
+	        trader_user_id
+	        , ROUND(AVG(rating), 2) as average_rating
+	        FROM reviews
+	        GROUP BY trader_user_id
+        ) as r
+	    on tp.user_id = r.trader_user_id
+        WHERE tp.user_id = ?;
         `;
         
         const [traderResults] = await db.query(tp_query, [traderId]);
@@ -232,6 +253,33 @@ exports.postRegisterPage = async (req, res) => {
         return res.status(200).json({
             status: 'success',
             message: 'Registration successful'
+        });
+
+    } catch (err) {
+        console.error("API Error: ", err);
+        return res.status(500).json({
+            status: 'error',
+            message: 'Server error'
+        });
+    };
+};
+
+exports.postSubmitRating = async (req, res) => {
+
+    try {
+        const {traderId, rating} = req.body;
+
+        const query = `
+        INSERT INTO reviews
+        (trader_user_id, rating)
+        VALUES (?, ?)
+        `;
+
+        await db.query(query, [traderId, rating]);
+
+        return res.status(200).json({
+            status: 'success',
+            message: 'Rating submission successful'
         });
 
     } catch (err) {
