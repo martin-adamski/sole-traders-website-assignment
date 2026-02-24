@@ -42,6 +42,32 @@ exports.getAllTraders = async (req, res) => {
 
         const [traders] = await db.query(query, [type, region]);
 
+        // Charts queries
+
+        // Bookings per month
+        const monthlyQuery = `
+        SELECT 
+        DATE_FORMAT(job_date, '%M') AS month
+        , COUNT(*) AS count
+        FROM bookings
+        GROUP BY 1
+        ORDER BY 2 DESC;
+        `;
+        const [monthlyBookings] = await db.query(monthlyQuery);
+
+        // Booking per trade type
+        const popularityQuery = `
+        SELECT tp.trade_type, COUNT(b.id) AS count
+        FROM bookings b
+        INNER JOIN services s 
+            ON b.service_id = s.id
+        INNER JOIN trader_profiles tp 
+            ON s.trader_user_id = tp.user_id
+        GROUP BY 1
+        ORDER BY 2 DESC
+        `;
+        const [tradePopularity] = await db.query(popularityQuery);
+
         return res.status(200).json({
             status: 'success',
             result: {
@@ -49,6 +75,8 @@ exports.getAllTraders = async (req, res) => {
                 traders: traders,
                 types: ALLOWED_TRADES,
                 regions: ALLOWED_REGIONS,
+                monthlyBookings: monthlyBookings,
+                tradePopularity: tradePopularity
             }
         });
 

@@ -44,4 +44,60 @@
     </ul>
 <% } %>
 
+<hr>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script type="application/json" id="chartData">
+    {
+        "monthly": <%- monthlyBookings %>,
+        "popularity": <%- tradePopularity %>
+    }
+</script>
+
+<div class="columns is-desktop mb-5">
+    <div class="column is-half">
+        <canvas id="monthlyChart"></canvas>
+    </div>
+    <div class="column is-half">
+        <canvas id="popularityChart"></canvas>
+    </div>
+</div>
+
+<script>
+    try {
+        const rawData = document.getElementById('chartData').textContent;
+        const data = JSON.parse(rawData);
+
+        const makeChart = (id, label, arr, xKey, yKey, color) => {
+            if (!arr || arr.length === 0) return;
+            
+            new Chart(document.getElementById(id), {
+                type: 'bar',
+                data: {
+                    labels: arr.map(d => d[xKey]),
+                    datasets: [{ 
+                        label: label,
+                        data: arr.map(d => d[yKey]),
+                        backgroundColor: color,
+                    }],
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }, 
+                    },
+                },
+            });
+        };
+
+        makeChart('monthlyChart', 'Bookings per Month', data.monthly, 'month', 'count', '#36A2EB');
+        makeChart('popularityChart', 'Bookings by Trade', data.popularity, 'trade_type', 'count', '#4BC0C0');
+
+    } catch (err) {
+        console.error("Chart error:", err.message);
+    }
+</script>
+
 <%- include('partials/footer') %>

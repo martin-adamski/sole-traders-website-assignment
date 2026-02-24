@@ -25,8 +25,9 @@ exports.getAllTraders = async (req, res) => {
             currentFilter: {
                 type: selectedType,
                 region: selectedRegion,
-            }
-
+            },
+            monthlyBookings: JSON.stringify(data.monthlyBookings),
+            tradePopularity: JSON.stringify(data.tradePopularity),
         });
 
     } catch (err) {
