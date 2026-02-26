@@ -6,6 +6,8 @@ const { isAuth } = require('../middleware/middleware');
 // Applying isAuth to all routes
 router.use(isAuth);
 
+router.get('/dashboard', privateController.getDashboard);
+
 router.get('/edit-profile', privateController.getEditProfilePage);
 router.post('/edit-profile', privateController.postEditProfilePage);
 

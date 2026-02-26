@@ -1,11 +1,13 @@
 <%- include('partials/header') %>
 
-<h1><%= title %></h1>
-<p>Local Professionals. Direct connections. No hidden fees.</p>
+<div class="box">
+    <div class="title is-3 mb-1 has-text-centered"> <%= title %> </div>
+    <p class="subtitle is-5 mb-1 has-text-centered">Local Professionals. Direct connections. No hidden fees.</p>
+</div>
 
-<p>
-    <a href="/directory">Find a Trader</a>
-    <a href="/register">Create an Account</a>
-</p>
+<div class="is-flex is-justify-content-center">
+    <a href="/directory" class="button m-1">Find a Trader</a>
+    <a href="/register" class="button m-1">Create an Account</a>
+</div>
 
 <%- include('partials/footer') %>

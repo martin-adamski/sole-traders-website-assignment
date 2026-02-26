@@ -7,31 +7,63 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
 </head>
 <body>
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+        <div class="nav-brand">
+            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarImplementation">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
+        </div>
 
-    <nav>
-        <ul>
-            <li><strong><a href="/">Sole Traders</a></strong></li>
-            <li><a href="/directory">Directory</a></li>
-            
-            <% if (!user.isloggedin) { %>
-                <li><a href="/login">Login</a></li>
-                <li><a href="/register">Register</a></li>
-            <% } else { %>
-                <% if (user.role === 'Trader') { %>
-                    <li><a href="/view-profile">View Profile</a></li>
-                    <li><a href="/view-bookings">View Bookings</a></li>
-                    <li><a href="/view-services">View Services</a></li>
-                    <li><a href="/edit-availability">View Availability</a></li>
-                    <li><a href="/logout">Logout</a></li>
-                <% } else if (user.role === 'Client') { %>
-                    <!-- <li><a href="/view-bookings">Bookings</a></li> got to decide what to do with customer bookings and how to view-->
-                    <li><a href="/logout">Logout</a></li>
-                <% } else if (user.role === 'Admin') { %>
-                    <li><a href="/logout">Logout</a></li>
+        <div id="navbarImplementation" class="navbar-menu">
+            <div class="navbar-start">
+                <% if (!user.isloggedin) { %>
+                    <a class="navbar-item" href="/">Home</a>
+                    <a class="navbar-item" href="/directory">Directory</>
+                    <a class="navbar-item" href="/login">Login</a>
+                    <a class="navbar-item" href="/register">Register</a>
+                <% } else { %>
+                    <% if (user.role === 'Trader') { %>
+                        <a class="navbar-item" href="/dashboard">Dashboard</a>
+                        <a class="navbar-item" href="/view-profile">View Profile</a>
+                        <a class="navbar-item" href="/view-services">View Services</a>
+                        <a class="navbar-item" href="/view-bookings">View Bookings</a>
+                        <a class="navbar-item" href="/edit-availability">View Availability</a>
+                    <% } %>
                 <% } %>
-            <% } %>
-        </ul>
-    </nav>
-    <hr>
+            </div>
 
-<main>
+            <div class="navbar-end">
+                <% if (user.isloggedin) { %>
+                    <a class="navbar-item" href="/logout">Logout</a>
+                <% } %>
+            </div>
+        </div>
+    </nav>
+<hr>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // Get all "navbar-burger" elements
+    const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+
+    // Add a click event on each of them
+    $navbarBurgers.forEach( el => {
+        el.addEventListener('click', () => {
+
+        // Get the target from the "data-target" attribute
+        const target = el.dataset.target;
+        const $target = document.getElementById(target);
+
+        // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
+        el.classList.toggle('is-active');
+        $target.classList.toggle('is-active');
+        });
+    });
+});
+</script> 
+
+<main class="content">

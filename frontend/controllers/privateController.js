@@ -7,6 +7,17 @@ const apiClient = axios.create({
     }
 });
 
+// Get dashboard
+exports.getDashboard = (req, res) => {
+
+    try { 
+        res.render('private-dashboard'); 
+    } catch (err) {
+        console.error("Network error: ", err.message);
+        return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
+    }
+};
+
 // Get edit profile page
 exports.getEditProfilePage = async (req, res) => {
 
