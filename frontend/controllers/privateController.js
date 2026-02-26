@@ -1,86 +1,34 @@
 const axios = require('axios');
 
-// Get login page
-exports.getLoginPage = (req, res) => {
- 
-    try {
-        res.render('login');
-    } catch (err) {
-        console.error("Network error: ", err.message);
-        return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
+// Adding API key to header to safely communicate with backend
+const apiClient = axios.create({
+    headers: {
+        'x-api-key': process.env.API_KEY
     }
-};
- 
-// Post login page
-exports.postLogin = async (req, res) => {
-    
-    try {
-        const { username, userpass } = req.body;
-        const endpoint = 'http://localhost:3003/login';
-
-        const apiResponse = await axios.post(endpoint, { username, userpass });
-        const user = apiResponse.data.result;
-
-        req.session.user = {
-            isloggedin: true,
-            id: user.id,
-            role: user.role,
-            full_name: user.full_name,
-            email: user.email,
-        }
-        res.redirect('/');
-    } catch (err) {
-        if (err.response) {
-            const status = err.response.status;
-
-            if (status === 400 || status === 401) {
-                return res.render('login', { errorMessage: 'Incorrect username or password.' });
-            }
-
-            if (status === 500) {
-                return res.render('errorPage500', { message: 'Our system are currently down.' });
-            }
-        }
-        console.error("Network error: ", err.message);
-        return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
-    }
-};
-
-// Get logout
-exports.getLogout = (req, res) => {
-    req.session.destroy(() => {
-        res.clearCookie();
-        res.redirect('/');
-    })
-}
+});
 
 // Get edit profile page
 exports.getEditProfilePage = async (req, res) => {
 
     try { 
-        if ((req.session.user?.role === 'Trader' || req.session.user?.role === 'Admin')) {
+        const traderId = req.session.user.id;
+        const endpoint = `http://localhost:3003/edit-profile/${traderId}`;
 
-            const traderId = req.session.user.id;
-            const endpoint = `http://localhost:3003/edit-profile/${traderId}`;
+        const apiResponse = await apiClient.get(endpoint);
+        const data = apiResponse.data.result;
 
-            const apiResponse = await axios.get(endpoint);
-            const data = apiResponse.data.result;
+        const safeProfile = {
+            trade_type: data.trade_type || '', 
+            region: data.region || '',
+            bio: data.bio || '',
+            availability: data.availability_text || '',
+            full_name: data.full_name
+        };
 
-            const safeProfile = {
-                trade_type: data.trade_type || '', 
-                region: data.region || '',
-                bio: data.bio || '',
-                availability: data.availability_text || '',
-                full_name: data.full_name
-            };
-
-            res.render('private-edit-trader-profile', {
-                trader_id: traderId,
-                profile: safeProfile,    
-            }); 
-        } else {
-            return res.redirect('/');
-        }
+        res.render('private-edit-trader-profile', {
+            trader_id: traderId,
+            profile: safeProfile,    
+        }); 
 
     } catch (err) {
         console.error("Network error: ", err.message);
@@ -95,7 +43,7 @@ exports.postEditProfilePage = async (req, res) => {
         const { trader_id, trade_type, city, bio, availability } = req.body;
         const endpoint = `http://localhost:3003/edit-profile/`;
 
-        const apiResponse = await axios.post(endpoint, { trader_id, trade_type, city, bio, availability });
+        const apiResponse = await apiClient.post(endpoint, { trader_id, trade_type, city, bio, availability });
         const data = apiResponse.data.result;
         
         req.session.message = {
@@ -140,31 +88,25 @@ exports.postEditProfilePage = async (req, res) => {
 exports.getViewProfilePage = async (req, res) => {
 
     try {
+        const traderId = req.session.user.id;
+        const endpoint = `http://localhost:3003/view-profile/${traderId}`;
+
+        const apiResponse = await apiClient.get(endpoint);
+        const data = apiResponse.data.result;
+
+        const safeProfile = {
+            trade_type: data.trade_type || '', 
+            region: data.region || '',
+            bio: data.bio || '',
+            availability: data.availability_text || '',
+            full_name: data.full_name
+        };
+
+        res.render('private-view-trader-profile', {
+            trader_id: traderId,
+            profile: safeProfile,    
+        }); 
         
-        if ((req.session.user?.role === 'Trader' || req.session.user?.role === 'Admin')) {
-
-            const traderId = req.session.user.id;
-            const endpoint = `http://localhost:3003/view-profile/${traderId}`;
-
-            const apiResponse = await axios.get(endpoint);
-            const data = apiResponse.data.result;
-
-            const safeProfile = {
-                trade_type: data.trade_type || '', 
-                region: data.region || '',
-                bio: data.bio || '',
-                availability: data.availability_text || '',
-                full_name: data.full_name
-            };
-
-            res.render('private-view-trader-profile', {
-                trader_id: traderId,
-                profile: safeProfile,    
-            }); 
-        } else {
-            return res.redirect('/');
-        }
-
     } catch (err) {
         console.error("Network error: ", err.message);
         return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
@@ -175,24 +117,18 @@ exports.getViewProfilePage = async (req, res) => {
 exports.getViewTraderBookingsPage = async (req, res) => {
 
     try {
-        
-        if ((req.session.user?.role === 'Trader' || req.session.user?.role === 'Admin')) {
+        const traderId = req.session.user.id;
+        const queryStatus = req.query.status || 'Pending';
 
-            const traderId = req.session.user.id;
-            const queryStatus = req.query.status || 'Pending';
+        const endpoint = `http://localhost:3003/view-bookings/${traderId}`;
 
-            const endpoint = `http://localhost:3003/view-bookings/${traderId}`;
+        const apiResponse = await apiClient.get(endpoint, { params : { status : queryStatus }});
 
-            const apiResponse = await axios.get(endpoint, { params : { status : queryStatus }});
-
-            res.render('private-view-trader-bookings', {
-                traderId: traderId,   
-                bookings: apiResponse.data.result.bookings,
-                currentFilter: queryStatus,      
-            }); 
-        } else {
-            return res.redirect('/');
-        }
+        res.render('private-view-trader-bookings', {
+            traderId: traderId,   
+            bookings: apiResponse.data.result.bookings,
+            currentFilter: queryStatus,      
+        }); 
 
     } catch (err) {
         console.error("Network error: ", err.message);
@@ -209,7 +145,7 @@ exports.postBookingStatus = async (req, res) => {
         
         const endpoint = `http://localhost:3003/update-booking/${bookingId}`;
 
-        const apiResponse = await axios.patch(endpoint, { newStatus : newStatus });
+        const apiResponse = await apiClient.patch(endpoint, { newStatus : newStatus });
 
         return res.redirect('/view-bookings');
 
@@ -223,21 +159,17 @@ exports.postBookingStatus = async (req, res) => {
 exports.getViewTraderServices = async (req, res) => {
 
     try { 
-        if ((req.session.user?.role === 'Trader' || req.session.user?.role === 'Admin')) {
+        const traderId = req.session.user.id;
+        const endpoint = `http://localhost:3003/view-services/${traderId}`;
 
-            const traderId = req.session.user.id;
-            const endpoint = `http://localhost:3003/view-services/${traderId}`;
+        const apiResponse = await apiClient.get(endpoint);
+        const data = apiResponse.data.result;
 
-            const apiResponse = await axios.get(endpoint);
-            const data = apiResponse.data.result;
+        return res.render('private-view-trader-services', {
+            services: data.services,    
+        });
 
-            return res.render('private-view-trader-services', {
-                services: data.services,    
-            }); 
-        } else {
-            return res.redirect('/');
-        }
-    } catch (err) {
+        } catch (err) {
         console.error("Network error: ", err.message);
         return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
     }
@@ -247,25 +179,18 @@ exports.getViewTraderServices = async (req, res) => {
 exports.getEditTraderService = async (req, res) => {
 
     try {
+        const traderId = req.session.user.id;
+        const serviceId = req.params.id;
+        const endpoint = `http://localhost:3003/edit-service/${serviceId}`;
 
-        if ((req.session.user?.role === 'Trader' || req.session.user?.role === 'Admin')) {
+        const apiResponse = await apiClient.get(endpoint, { params : { traderId : traderId }});
+        const data = apiResponse.data.result;
 
-            const traderId = req.session.user.id;
-            const serviceId = req.params.id;
-            const endpoint = `http://localhost:3003/edit-service/${serviceId}`;
-
-            const apiResponse = await axios.get(endpoint, { params : { traderId : traderId }});
-            const data = apiResponse.data.result;
-
-            return res.render('private-edit-trader-service', {
-                serviceId : serviceId,
-                traderId : traderId,
-                service : data.service,
-            })
-        
-        } else {
-            return res.redirect('/');
-        }   
+        return res.render('private-edit-trader-service', {
+            serviceId : serviceId,
+            traderId : traderId,
+            service : data.service,
+        })
 
     } catch (err) {
         console.error("Network error: ", err.message);
@@ -277,33 +202,27 @@ exports.getEditTraderService = async (req, res) => {
 exports.postEditTraderService = async (req, res) => {
 
     try {
-        if ((req.session.user?.role === 'Trader' || req.session.user?.role === 'Admin')) {
+        const { title, description, base_price, price_type } = req.body;
+        const traderId = req.session.user.id;
+        const serviceId = req.params.id;
+        const endpoint = `http://localhost:3003/edit-service/${serviceId}`;
 
-            const { title, description, base_price, price_type } = req.body;
-            const traderId = req.session.user.id;
-            const serviceId = req.params.id;
-            const endpoint = `http://localhost:3003/edit-service/${serviceId}`;
+        const apiResponse = await apiClient.post(endpoint, { serviceId, traderId, title, description, base_price, price_type });
+        const data = apiResponse.data.result;
 
-            const apiResponse = await axios.post(endpoint, { serviceId, traderId, title, description, base_price, price_type });
-            const data = apiResponse.data.result;
-
-            req.session.message = {
-                type: 'is-success',
-                text: 'Your service has been edited succesfully.',
-            };
+        req.session.message = {
+            type: 'is-success',
+            text: 'Your service has been edited succesfully.',
+        };
         
-            // Forcing the session save to display the message
-            req.session.save(err => {
-                if (err) {
-                    console.error(err);
-                    return res.status(500).send('Session save error');
-                }
-                return res.redirect(`/edit-service/${serviceId}`);
-            });
-
-        } else {
-            return res.redirect('/');
-        }   
+        // Forcing the session save to display the message
+        req.session.save(err => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Session save error');
+            }
+            return res.redirect(`/edit-service/${serviceId}`);
+        });
 
     } catch (err) {
 
@@ -333,18 +252,11 @@ exports.postEditTraderService = async (req, res) => {
 exports.getAddTraderService = async (req, res) => {
 
     try {
+        const traderId = req.session.user.id;
 
-        if ((req.session.user?.role === 'Trader' || req.session.user?.role === 'Admin')) {
-
-            const traderId = req.session.user.id;
-
-            return res.render('private-add-trader-service', {
-                traderId : traderId,
-            })
-        
-        } else {
-            return res.redirect('/');
-        }   
+        return res.render('private-add-trader-service', {
+            traderId : traderId,
+        })
 
     } catch (err) {
         console.error("Network error: ", err.message);
@@ -357,33 +269,26 @@ exports.getAddTraderService = async (req, res) => {
 exports.postAddTraderService = async (req, res) => {
 
     try {
+        const { title, description, base_price, price_type } = req.body;
+        const traderId = req.session.user.id;
+        const endpoint = `http://localhost:3003/add-service`;
 
-        if ((req.session.user?.role === 'Trader' || req.session.user?.role === 'Admin')) {
+        const apiResponse = await apiClient.post(endpoint, { traderId, title, description, base_price, price_type });
+        const data = apiResponse.data.result;
 
-            const { title, description, base_price, price_type } = req.body;
-            const traderId = req.session.user.id;
-            const endpoint = `http://localhost:3003/add-service`;
-
-            const apiResponse = await axios.post(endpoint, { traderId, title, description, base_price, price_type });
-            const data = apiResponse.data.result;
-
-            req.session.message = {
-                type: 'is-success',
-                text: 'Your service has been added succesfully.',
-            };
+        req.session.message = {
+            type: 'is-success',
+            text: 'Your service has been added succesfully.',
+        };
         
-            // Forcing the session save to display the message
-            req.session.save(err => {
-                if (err) {
-                    console.error(err);
-                    return res.status(500).send('Session save error');
-                }
-                return res.redirect(`/add-service/`);
-            });
-        
-        } else {
-            return res.redirect('/');
-        }   
+        // Forcing the session save to display the message
+        req.session.save(err => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Session save error');
+            }
+            return res.redirect(`/add-service/`);
+        });
 
     } catch (err) {
 
@@ -413,33 +318,26 @@ exports.postAddTraderService = async (req, res) => {
 exports.postDeleteTraderService = async (req, res) => {
     
     try {
+        const traderId = req.session.user.id;
+        const serviceId = req.params.id;
+        const endpoint = `http://localhost:3003/delete-service/${serviceId}`;
 
-        if ((req.session.user?.role === 'Trader' || req.session.user?.role === 'Admin')) {
+        const apiResponse = await apiClient.delete(endpoint, { data : { traderId : traderId }});
+        const data = apiResponse.data.result;
 
-            const traderId = req.session.user.id;
-            const serviceId = req.params.id;
-            const endpoint = `http://localhost:3003/delete-service/${serviceId}`;
-
-            const apiResponse = await axios.delete(endpoint, { data : { traderId : traderId }});
-            const data = apiResponse.data.result;
-
-            req.session.message = {
-                type: 'is-success',
-                text: 'Your service has been deleted succesfully.',
-            };
+        req.session.message = {
+            type: 'is-success',
+            text: 'Your service has been deleted succesfully.',
+        };
         
-            // Forcing the session save to display the message
-            req.session.save(err => {
-                if (err) {
-                    console.error(err);
-                    return res.status(500).send('Session save error');
-                }
-                return res.redirect(`/view-services/`);
-            });
-
-        } else {
-            return res.redirect('/');
-        }   
+        // Forcing the session save to display the message
+        req.session.save(err => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Session save error');
+            }
+            return res.redirect(`/view-services/`);
+        });
 
     } catch (err) {
         console.error("Network error: ", err.message);
@@ -450,32 +348,27 @@ exports.postDeleteTraderService = async (req, res) => {
 exports.getEditTraderAvailability = async (req, res) => {
     
     try {
-        if ((req.session.user?.role === 'Trader' || req.session.user?.role === 'Admin')) {
-            
-            const traderId = req.session.user.id;
-            const endpoint = `http://localhost:3003/edit-availability/${traderId}`;
+        const traderId = req.session.user.id;
+        const endpoint = `http://localhost:3003/edit-availability/${traderId}`;
 
-            const apiResponse = await axios.get(endpoint);
-            const data = apiResponse.data.result;
+        const apiResponse = await apiClient.get(endpoint);
+        const data = apiResponse.data.result;
 
-            const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-            const safe_days = {};
+        const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        const safe_days = {};
 
-            for (const day of daysOfWeek) {
-                safe_days[day] = {
-                    start_time: data[day]?.start_time || '09:00',
-                    end_time: data[day]?.end_time || '17:00',
-                    selected: data[day]?.selected || 'No',
-                };
-            }
-
-            res.render('private-edit-trader-availability', {
-                trader_id: traderId,
-                days: safe_days,    
-            }); 
-        } else {
-            return res.redirect('/');
+        for (const day of daysOfWeek) {
+            safe_days[day] = {
+                start_time: data[day]?.start_time || '09:00',
+                end_time: data[day]?.end_time || '17:00',
+                selected: data[day]?.selected || 'No',
+            };
         }
+
+        res.render('private-edit-trader-availability', {
+            trader_id: traderId,
+            days: safe_days,    
+        }); 
 
     } catch (err) {
         console.error("Network error: ", err.message);
@@ -486,41 +379,36 @@ exports.getEditTraderAvailability = async (req, res) => {
 exports.postEditTraderAvailability = async (req, res) => {
     
     try {
-        if ((req.session.user?.role === 'Trader' || req.session.user?.role === 'Admin')) {
-            
-            const traderId = req.session.user.id;
-            const endpoint = `http://localhost:3003/edit-availability/${traderId}`;
+        const traderId = req.session.user.id;
+        const endpoint = `http://localhost:3003/edit-availability/${traderId}`;
 
-            const availabilityData = [];
-            const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        const availabilityData = [];
+        const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
-            for (const day of daysOfWeek) {
-                availabilityData.push({
-                    day_of_week: day.charAt(0).toUpperCase() + day.slice(1), 
-                    start_time: req.body[`${day}1`],
-                    end_time: req.body[`${day}2`],
-                    selected: req.body[`${day}3`]
-                });
-            }
-
-            await axios.post(endpoint, { trader_id: traderId, availability: availabilityData });
-
-            req.session.message = {
-                type: 'is-success',
-                text: 'Your availability has been updated successfully.',
-            };
-        
-            req.session.save(err => {
-                if (err) {
-                    console.error(err);
-                    return res.status(500).send('Session save error');
-                }
-                return res.redirect('/edit-availability');
+        for (const day of daysOfWeek) {
+            availabilityData.push({
+                day_of_week: day.charAt(0).toUpperCase() + day.slice(1), 
+                start_time: req.body[`${day}1`],
+                end_time: req.body[`${day}2`],
+                selected: req.body[`${day}3`]
             });
-        } else {
-            return res.redirect('/');
         }
 
+        await apiClient.post(endpoint, { trader_id: traderId, availability: availabilityData });
+
+        req.session.message = {
+            type: 'is-success',
+            text: 'Your availability has been updated successfully.',
+        };
+        
+        req.session.save(err => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Session save error');
+            }
+            return res.redirect('/edit-availability');
+            });
+        
     } catch (err) {
         console.error("Network error: ", err.message);
         return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });

@@ -6,6 +6,12 @@
     </p>
 <% } %>
 
+<% if (locals.errorMessage) { %>
+    <p id="error-msg" class="help is-danger" style="font-weight: bold; margin-bottom: 10px;">
+        <%= errorMessage %>
+    </p>
+<% } %>
+
 <h1>Login</h1>
 <form action="/login" method="post">
 
@@ -18,12 +24,6 @@
         <label for="upass">Password</label>
         <input type="password" name="userpass" id="upass" placeholder="Enter password" required>
     </div>
-    
-    <% if (locals.errorMessage) { %>
-        <p id="error-msg" class="help is-danger" style="font-weight: bold; margin-bottom: 10px;">
-            <%= errorMessage %>
-        </p>
-    <% } %>
 
     <button type="submit">Submit</button>
 </form>

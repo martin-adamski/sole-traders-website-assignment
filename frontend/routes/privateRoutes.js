@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const privateController = require('../controllers/privateController');
+const { isAuth } = require('../middleware/middleware');
 
-router.get('/login', privateController.getLoginPage);
-router.post('/login', privateController.postLogin);
-router.get('/logout', privateController.getLogout);
+// Applying isAuth to all routes
+router.use(isAuth);
 
 router.get('/edit-profile', privateController.getEditProfilePage);
 router.post('/edit-profile', privateController.postEditProfilePage);

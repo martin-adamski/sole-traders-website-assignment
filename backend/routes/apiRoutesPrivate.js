@@ -1,7 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const apiControllerPrivate = require('../controllers/apiControllerPrivate');
+const { sanitiseInput, verifyApiKey } = require('../middleware/middleware');
 
+router.use(verifyApiKey);
+router.use(sanitiseInput);
+
+router.post('/register', apiControllerPrivate.postRegisterPage);
 router.post('/login', apiControllerPrivate.postLogin);
 
 router.get('/edit-profile/:id', apiControllerPrivate.getEditProfilePage);

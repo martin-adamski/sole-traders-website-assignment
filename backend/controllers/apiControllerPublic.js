@@ -1,5 +1,6 @@
 const db = require('../config/dbconnection');
-const { validateRegistration, validateBooking } = require('../utils/validation');
+const bcrypt = require('bcrypt');
+const { validateBooking } = require('../utils/validation');
 
 // Hardcoded consts variables to use for directory filters
 const ALLOWED_TRADES = ['Plumber', 'Electrician', 'Carpenter', 'Builder', 'Gardener'];
@@ -259,37 +260,6 @@ exports.postCreateBooking = async (req, res) => {
             message: 'Server error'
         });
     }
-};
-
-// Post register page
-exports.postRegisterPage = async (req, res) => {
-
-    try {
-        const { isValid, errors } = validateRegistration(req.body);
-        if (!isValid) return res.status(400).json({ status: 'error', message: errors.join(' ') });
-
-        const { useremail, userpass, username, userfullname, userrole } = req.body;
-
-        const query = `
-        INSERT INTO users
-        (username, email, full_name, password_hash, role)
-        VALUES (?, ?, ?, ?, ?)
-        `;
-
-        await db.query(query, [username, useremail, userfullname, userpass, userrole])
-
-        return res.status(200).json({
-            status: 'success',
-            message: 'Registration successful'
-        });
-
-    } catch (err) {
-        console.error("API Error: ", err);
-        return res.status(500).json({
-            status: 'error',
-            message: 'Server error'
-        });
-    };
 };
 
 exports.postSubmitRating = async (req, res) => {

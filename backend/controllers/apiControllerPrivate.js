@@ -1,5 +1,41 @@
 const db = require('../config/dbconnection');
-const { validateProfile, validateService } = require('../utils/validation');
+const bcrypt = require('bcrypt');
+const { validateProfile, validateService, validateRegistration } = require('../utils/validation');
+
+
+// Post register page
+exports.postRegisterPage = async (req, res) => {
+
+    try {
+        const { isValid, errors } = validateRegistration(req.body);
+        if (!isValid) return res.status(400).json({ status: 'error', message: errors.join(' ') });
+
+        const { useremail, userpass, username, userfullname, userrole } = req.body;
+
+        const saltRounds = 12;
+        const hashedPassword = bcrypt.hash(userpass, saltRounds);
+
+        const query = `
+        INSERT INTO users
+        (username, email, full_name, password_hash, role)
+        VALUES (?, ?, ?, ?, ?)
+        `;
+
+        await db.query(query, [username, useremail, userfullname, hashedPassword, userrole])
+
+        return res.status(200).json({
+            status: 'success',
+            message: 'Registration successful'
+        });
+
+    } catch (err) {
+        console.error("API Error: ", err);
+        return res.status(500).json({
+            status: 'error',
+            message: 'Server error'
+        });
+    };
+};
 
 // Post login page
 exports.postLogin = async (req, res) => {
@@ -14,15 +50,13 @@ exports.postLogin = async (req, res) => {
             });
         };
 
-        // temporary password handling
         const checkUserSQL = `
         SELECT *
         FROM users
-        WHERE username = ? and password_hash = ?
+        WHERE username = ?
         `;
-        //
 
-        const [rows] = await db.query(checkUserSQL, [username, userpass]);
+        const [rows] = await db.query(checkUserSQL, [username]);
 
         if (rows.length === 0) {
             return res.status(401).json({
@@ -31,12 +65,37 @@ exports.postLogin = async (req, res) => {
             });
         };
 
-        if (rows.length === 1) {
-            return res.status(200).json({
-                status: 'success',
-                result: rows[0]
+        const user = rows[0];
+        let isMatch = false;
+
+        const isAlreadyHashed = user.password_hash.startsWith("$2");
+
+        if (isAlreadyHashed) {
+            isMatch = bcrypt.compare(userpass, user.password_hash);
+        } else {
+            if (userpass === user.password_hash) {
+                isMatch = true;
+            }
+            const saltRounds = 12;
+            const hashedPassword = await bcrypt.hash(userpass, saltRounds);
+
+            await db.query(`
+                UPDATE users 
+                SET password_hash = ? 
+                WHERE id = ?`, [hashedPassword, user.id]);
+        };
+
+        if (!isMatch) {
+            return res.status(401).json({
+                status: 'failure',
+                message: 'Invalid credentials'
             });
         };
+
+        return res.status(200).json({
+                status: 'success',
+                result: user,
+            });
 
     } catch (err) {
         console.error("API Error: ", err);

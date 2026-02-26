@@ -1,5 +1,11 @@
 const axios = require('axios');
-const { end } = require('../../backend/config/dbconnection');
+
+// Adding API key to header to safely communicate with backend
+const apiClient = axios.create({
+    headers: {
+        'x-api-key': process.env.API_KEY
+    }
+});
 
 // Get home page
 exports.getHomePage = (req, res) => {
@@ -14,7 +20,7 @@ exports.getAllTraders = async (req, res) => {
 
         const endpoint = 'http://localhost:3003/directory';
 
-        const apiResponse = await axios.get(endpoint, { params : { type: selectedType, region: selectedRegion } });
+        const apiResponse = await apiClient.get(endpoint, { params : { type: selectedType, region: selectedRegion } });
         const data = apiResponse.data.result;
 
         res.render('public-directory', { 
@@ -43,7 +49,7 @@ exports.getTraderProfile = async (req, res) => {
         const traderId = req.params.id;
         const endpoint = `http://localhost:3003/traders/${traderId}`;
         
-        const apiResponse = await axios.get(endpoint);
+        const apiResponse = await apiClient.get(endpoint);
         const data = apiResponse.data.result;
 
         res.render('public-trader-profile', {
@@ -71,7 +77,7 @@ exports.getBookingPage = async (req, res) => {
         const serviceId = req.params.id;
         const endpoint = `http://localhost:3003/services/${serviceId}/book`;
 
-        const apiResponse = await axios.get(endpoint);
+        const apiResponse = await apiClient.get(endpoint);
         const data = apiResponse.data.result;
 
         res.render('public-book-service', {
@@ -97,7 +103,7 @@ exports.createBooking = async (req, res) => {
         // converting to null again
         client_user_id = client_user_id === '' ? null : client_user_id;
 
-        await axios.post(endpoint, {client_user_id, client_name, client_email, job_date, job_start_time, job_description});
+        await apiClient.post(endpoint, {client_user_id, client_name, client_email, job_date, job_start_time, job_description});
 
         res.locals.successfulMessage = 'Booking Successful.';
         return exports.getBookingPage(req, res);
@@ -139,7 +145,7 @@ exports.postRegisterPage = async (req, res) => {
         const { useremail, userpass, username, userfullname, userrole } = req.body;
         const endpoint = `http://localhost:3003/register`;
 
-        await axios.post(endpoint, { useremail, userpass, username, userfullname, userrole });
+        await apiClient.post(endpoint, { useremail, userpass, username, userfullname, userrole });
 
         req.session.message = {
         type: 'is-success',
@@ -179,6 +185,61 @@ exports.postRegisterPage = async (req, res) => {
     }
 };
 
+// Get login page
+exports.getLoginPage = (req, res) => {
+ 
+    try {
+        res.render('login');
+    } catch (err) {
+        console.error("Network error: ", err.message);
+        return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
+    }
+};
+
+// Post login page
+exports.postLogin = async (req, res) => {
+    
+    try {
+        const { username, userpass } = req.body;
+        const endpoint = 'http://localhost:3003/login';
+
+        const apiResponse = await apiClient.post(endpoint, { username, userpass });
+        const user = apiResponse.data.result;
+
+        req.session.user = {
+            isloggedin: true,
+            id: user.id,
+            role: user.role,
+            full_name: user.full_name,
+            email: user.email,
+        }
+        res.redirect('/');
+    } catch (err) {
+        if (err.response) {
+            const status = err.response.status;
+
+            if (status === 400 || status === 401) {
+                return res.render('login', { errorMessage: 'Incorrect username or password.' });
+            }
+
+            if (status === 500) {
+                return res.render('errorPage500', { message: 'Our system are currently down.' });
+            }
+        }
+        console.error("Network error: ", err.message);
+        return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
+    }
+};
+
+// Get logout
+exports.getLogout = (req, res) => {
+    req.session.destroy(() => {
+        res.clearCookie();
+        res.redirect('/');
+    })
+}
+
+// Post submit rating
 exports.postSubmitRating = async (req, res) => {
 
     try {
@@ -186,7 +247,7 @@ exports.postSubmitRating = async (req, res) => {
         const { traderId, rating } = req.body;
         const endpoint = `http://localhost:3003/submit-rating`;
 
-        await axios.post(endpoint, { traderId, rating });
+        await apiClient.post(endpoint, { traderId, rating });
 
         req.session.message = {
             type: 'is-success',
