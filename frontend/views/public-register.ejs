@@ -1,39 +1,42 @@
 <%- include('partials/header') %>
 
-<h1>Create an account</h1>
-<form action="/register" method="post">
+<div class="box has-text-centered">
+    <div class="title is-3">Create an account</div>
 
-    <div>
-        <label for="uemail">Email</label>
-        <input type="text" name="useremail" id="uemail" placeholder="Enter email" required>
-    </div>
-
-    <div>
-        <label for="upass">Password</label>
-        <input type="password" name="userpass" id="upass" placeholder="Enter password" required>
-    </div>
-
-    <div>
-        <label for="uname">Username</label>
-        <input type="text" name="username" id="uname" placeholder="Enter username" required>
-    </div>
+    <form action="/register" method="post">
+        <div class="field">
+            <input class="input" type="text" name="useremail" id="uemail" placeholder="Enter email" required>
+        </div>
     
-    <div>
-        <label for="ufullname">Full Name</label>
-        <input type="text" name="userfullname" id="ufullname" placeholder="Enter full name" required>
-    </div>
+        <div class="field">
+            <input class="input" type="password" name="userpass" id="upass" placeholder="Enter password" required>
+        </div>
 
-    <fieldset>
-        <legend>Do you wish to register as a client or a trader?</legend>
+        <div class="field">
+            <input class="input" type="text" name="username" id="uname" placeholder="Enter username" required>
+        </div>
 
-        <input type="radio" id="userChoice1" name="userrole" value="client" required>
-        <label for="userChoice1">Client</label>
-        
-        <input type="radio" id="userChoice2" name="userrole" value="trader" required>
-        <label for="userChoice2">Trader</label>
-    </fieldset>
+        <div class="field">
+            <input class="input" type="text" name="userfullname" id="ufullname" placeholder="Enter full name" required>
+        </div>
 
-    <button type="submit">Submit</button>
-</form>
+        <div class="control">
+            <p class="subtile is-5 has-text-centered mt-4">Do you wish to register as a client or a trader?</p>
+            
+            <label class="radio" for="userChoice1">
+                <input type="radio" id="userChoice1" name="userrole" value="client" required>
+                Client
+            </label>
+
+            <label class="radio" for="userChoice2">
+                <input type="radio" id="userChoice2" name="userrole" value="trader" required>
+                Trader
+            </label>
+        </div>
+
+        <button class="button is-dark mt-5" type="submit">Submit</button>
+    </form>
+</div>
+
 
 <%- include('partials/footer') %>

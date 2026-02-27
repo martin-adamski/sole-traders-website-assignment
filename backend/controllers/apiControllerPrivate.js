@@ -13,7 +13,7 @@ exports.postRegisterPage = async (req, res) => {
         const { useremail, userpass, username, userfullname, userrole } = req.body;
 
         const saltRounds = 12;
-        const hashedPassword = bcrypt.hash(userpass, saltRounds);
+        const hashedPassword = await bcrypt.hash(userpass, saltRounds);
 
         const query = `
         INSERT INTO users
@@ -71,7 +71,7 @@ exports.postLogin = async (req, res) => {
         const isAlreadyHashed = user.password_hash.startsWith("$2");
 
         if (isAlreadyHashed) {
-            isMatch = bcrypt.compare(userpass, user.password_hash);
+            isMatch = await bcrypt.compare(userpass, user.password_hash);
         } else {
             if (userpass === user.password_hash) {
                 isMatch = true;

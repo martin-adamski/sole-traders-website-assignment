@@ -15,10 +15,6 @@ exports.verifyApiKey = (req, res, next) => {
 
     const incomingKey = req.headers['x-api-key'];
 
-    // debugging
-    console.log("Frontend sent:", incomingKey);
-    console.log("API expects:", process.env.API_KEY);
-
     if (!incomingKey || incomingKey !== process.env.API_KEY) {
         return res.status(403).json({
             status: 'error',

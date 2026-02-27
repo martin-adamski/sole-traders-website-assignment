@@ -1,0 +1,32 @@
+<%- include('partials/header') %>
+
+<% if (locals.message) { %>
+    <p id="flash-msg" class="notification <%= message.type %> py-3">
+        <%= message.text %>
+    </p>
+<% } %>
+
+<% if (locals.errorMessage) { %>
+    <p id="error-msg" class="notification is-danger py-3">
+        <%= errorMessage %>
+    </p>
+<% } %>
+
+
+<div class="box has-text-centered">
+    <div class="title is-3">Login</div>
+
+    <form action="/login" method="post">
+        <div class="field">
+            <input class="input" type="text" name="username" id="uname" placeholder="Username" required>
+        </div>
+    
+        <div class="field">
+            <input class="input" type="password" name="userpass" id="upass" placeholder="Password" required>
+        </div>
+
+        <button class="button is-dark" type="submit">Submit</button>
+    </form>
+</div>
+
+<%- include('partials/footer') %>

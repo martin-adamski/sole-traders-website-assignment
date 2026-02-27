@@ -189,7 +189,7 @@ exports.postRegisterPage = async (req, res) => {
 exports.getLoginPage = (req, res) => {
  
     try {
-        res.render('login');
+        res.render('public-login');
     } catch (err) {
         console.error("Network error: ", err.message);
         return res.render('errorPage500', { message: 'Services unavailable. Please try again later.' });
@@ -219,7 +219,7 @@ exports.postLogin = async (req, res) => {
             const status = err.response.status;
 
             if (status === 400 || status === 401) {
-                return res.render('login', { errorMessage: 'Incorrect username or password.' });
+                return res.render('public-login', { errorMessage: 'Incorrect username or password.' });
             }
 
             if (status === 500) {
