@@ -1,32 +1,14 @@
 <%- include('partials/header') %>
 
-<div class="content">
-
-    <div>
-        <h2>Your Trader Profile</h2>    
-    </div>
-    <div>
-        <h4>Full Name:</h4>
-        <h5><%= profile.full_name %></h5>
-    </div>
-    <div>
-        <h4>Trade Type:</h4>
-        <h5><%= profile.trade_type %></h5>
-    </div>
-    <div>
-        <h4>City:</h4>
-        <h5><%= profile.region %></h5>
-    </div>
-    <div>
-        <h4>Bio:</h4>
-        <h5><%= profile.bio %></h5>
-    </div>
-    <div>
-        <h4>Availability Text:</h4>
-        <h5><%= profile.availability %></h5>
-    </div>
-
-    <a href="/edit-profile/">Edit Profile</a>
+<div class="box m-3">
+    <p class="title is-3 mb-4 mt-3 ml-2">Your Trader Profile</p>    
+    <p class="subtitle is-5 mb-2 mt-3 ml-2">Full Name: <strong><%= profile.full_name %></strong></p>
+    <p class="subtitle is-5 mb-2 mt-3 ml-2">Trade Type: <strong><%= profile.trade_type %></strong></p>
+    <p class="subtitle is-5 mb-2 mt-3 ml-2">City: <strong><%= profile.region %></strong></p>
+    <p class="subtitle is-5 mb-2 mt-3 ml-2">Bio: <strong><%= profile.bio %></strong></p>
+    <p class="subtitle is-5 mb-2 mt-3 ml-2">Availability Description: <strong><%= profile.availability %></strong></p>
+    
+    <a class="button is-link mb-2 mt-4 ml-2" href="/edit-profile/">Edit Profile</a>
 
 </div>
 

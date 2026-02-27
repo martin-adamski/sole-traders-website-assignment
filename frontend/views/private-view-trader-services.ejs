@@ -1,37 +1,36 @@
 <%- include('partials/header') %>
 
-<hr>
-
 <% if (locals.message) { %>
     <p id="flash-msg" class="notification <%= message.type %> m-3 py-3">
         <%= message.text %>
     </p>
 <% } %>
 
-<h1>Manage Services</h1>
-<a href="/add-service/">Add Service</a>
+<div class="box m-3">
+    <p class="title is-3 mb-4 mt-3 ml-2">Manage Services</p>
+    <a class="button is-link mb-2 mt-2 ml-2" href="/add-service/">Add Service</a>
+</div>
+
+<p class="title is-3 mb-4 mt-5 ml-5">Services: </p>
 
 <% if (services.length === 0) { %>
-    <p>No services found.</p>
+    <div class="box m-3">
+        <p class="title is-3 mb-4 mt-3 ml-2">No services found.</p>
+    </div>
 <% } else { %>
-    <ul>
-        <% services.forEach(service => { %>
-            <li>
-                <p><%= service.title %></p>
-                <p><%= service.description %></p>
-                <p><%= service.base_price %></p>
-                <p><%= service.price_type %></p>
-            </li>
-
-            <a href="/edit-service/<%= service.id %>">Edit Service</a>
+    <% services.forEach(service => { %>
+        <div class="box m-3">
+            <p class="subtitle is-5 mb-2 mt-3 ml-2">Title: <strong><%= service.title %></strong></p>
+            <p class="subtitle is-5 mb-2 mt-3 ml-2">Description: <strong><%= service.description %></strong></p>
+            <p class="subtitle is-5 mb-2 mt-3 ml-2">Base Price: <strong><%= service.base_price %></strong></p>
+            <p class="subtitle is-5 mb-2 mt-3 ml-2">Price Type: <strong><%= service.price_type %></strong></p>
             
-            <form action="/delete-service/<%= service.id %>" method="POST" onsubmit="return confirm('Are you sure you want to delete the service')">
-                <button type="submit">Delete Service</button>
+            <form action="/delete-service/<%= service.id %>" method="POST" onsubmit="return confirm('Are you sure you want to delete the service?')">
+                <a class="button is-link mb-2 mt-2 ml-2" href="/edit-service/<%= service.id %>">Edit Service</a>
+                <button class="button is-danger mb-2 mt-2 ml-2" type="submit">Delete Service</button>
             </form>
-
-            <br>
-        <% }); %>
-    </ul>
+        </div>
+    <% }); %>
 <% } %>
 
 <%- include('partials/footer') %>

@@ -1,52 +1,64 @@
 <%- include('partials/header') %>
 
-<hr>
-
 <% if (locals.message) { %>
     <p id="flash-msg" class="notification <%= message.type %> m-3 py-3">
         <%= message.text %>
     </p>
 <% } %>
 
-<h1>Edit Trader Profile</h1>
-
-<form action="/edit-profile" method="POST">
-    <input type="hidden" name="trader_id" value="<%= trader_id %>">
-
-    <div>
-        <label for="trade_typeChoice">Trade Type:</label>
-        <input type="text" name="trade_type" id="trade_typeChoice" value="<%= profile.trade_type %>" required>
-    </div>
-
-    <div>
-        <label for="cityChoice">City:</label>
-        <input type="text" name="city" id="cityChoice" value="<%= profile.region %>" required>
-    </div>
+<div class="box m-3">
+    <p class="title is-3 mb-4 mt-3 ml-2">Edit Trader Profile</p>
     
-    <div>
-        <label for="bioText">Bio:</label>
-        <textarea name="bio" rows="5" id="bioText" required><%= profile.bio %></textarea>
+    <form action="/edit-profile" method="POST">
+        <input type="hidden" name="trader_id" value="<%= trader_id %>">
+
+        <div class="field mb-2 mt-1 ml-2">
+            <label class="label" for="trade_typeChoice">Trade Type:</label>
+            <div class="control">
+                <input class="input" type="text" name="trade_type" id="trade_typeChoice" value="<%= profile.trade_type %>" required>
+            </div>
+        </div>
+
+        <div class="field mb-2 mt-1 ml-2">
+            <label class="label" for="cityChoice">City:</label>
+            <div class="control">
+                <input class="input" type="text" name="city" id="cityChoice" value="<%= profile.region %>" required>
+            </div>
+        </div>
+    
+        <div class="field mb-2 mt-1 ml-2">
+            <label class="label" for="bioText">Bio:</label>
+            <div class="control">
+                <textarea class="textarea" name="bio" rows="3" id="bioText" required><%= profile.bio %></textarea>
+            </div>
+        </div>
+
+        <div class="field mb-2 mt-1 ml-2">
+            <label class="label" for="availabilityText">Availability Description:</label>
+            <div class="control">
+                <textarea class="textarea" name="availability" rows="3" id="availabilityText" required><%= profile.availability %></textarea>
+            </div>
+        </div>
+
+        <button class="button is-dark mb-2 mt-1 ml-2" type="submit">Save Profile</button>
+        <a class="button is-link mb-2 mt-1 ml-2" href="/view-profile">Cancel</a>
+    </form>
+</div>
+
+<hr>
+
+<div class="box m-3">
+    <div class="content is-small">
+        <p class="subtitle is-6 mb-2 mt-1 ml-2">
+            <strong>Trades:</strong> Plumber, Electrician, Carpenter, Builder, Gardener
+        </p>
+        <p class="subtitle is-6 mb-2 mt-1 ml-2">
+            <strong>Cities:</strong> London, Cardiff, Manchester, Birmingham, Leeds
+        </p>
+        <p class="subtitle has-text-grey-light is-italic is-6 mb-2 mt-1 ml-2">
+            Both lists will be expanded in the future.
+        </p>
     </div>
-
-    <!-- when working on availability for booking, maybe will change that-->
-    <div>
-        <label for="availabilityText">Availability:</label>
-        <textarea name="availability" rows="5" id="availabilityText" required><%= profile.availability %></textarea>
-    </div>
-
-    <button type="submit">Save Profile</button>
-
-</form>
-
-<a href="/view-profile">Cancel</a>
-
-</br>
-</br>
-<p>
-    Currently allowed trade types: Plumber, Electrician, Carpenter, Builder, Gardener.</br>
-    Currently allowed regions: London, Cardiff, Manchester, Birmingham, Leeds.</br>
-    </br>
-    Both lists will be expanded in the future.
-</p>
+</div>
 
 <%- include('partials/footer') %>

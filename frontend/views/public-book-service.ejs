@@ -43,14 +43,14 @@
     <div class="field mb-2 mt-1 ml-2">
         <label class="label" for="date">Date:</label>
         <div class="control">
-            <input class="input" type="date" name="job_date" id="date" min="2026-01-01" max="2028-01-01"required>
+            <input class="input" name="job_date" id="date" min="2026-01-01" max="2028-01-01" placeholder="Select a date" onfocus="(this.type='date')" onblur="if(!this.value) this.type='text'" required>
         </div>
     </div>
     
     <div class="field mb-2 mt-1 ml-2">
         <label class="label" for="start_time">Start Time:</label>
         <div class="control">
-            <input class="input" type="time" name="job_start_time" id="start_time" required>
+            <input class="input" name="job_start_time" id="start_time" placeholder="Select a time" onfocus="(this.type='time')" onblur="if(!this.value) this.type='text'" required>
         </div>
     </div>
     

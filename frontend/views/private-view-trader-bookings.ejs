@@ -1,51 +1,76 @@
 <%- include('partials/header') %>
 
-<h1>Bookings</h1>
+<div class="box m-3">
+    <form action="/view-bookings" method="GET">
+        <div class="columns is-vcentered"> 
+            
+            <div class="column m-3">
+                <p class="title is-3">Bookings</p>
+            </div>
 
-<form action="/view-bookings" method="GET">
-    <label>Booking Status</label>
-    <select name="status">
-        <option value="Pending" <%= currentFilter === 'Pending' ? 'selected' : '' %>>Pending</option>
-        <option value="Confirmed" <%= currentFilter === 'Confirmed' ? 'selected' : '' %>>Confirmed</option>
-        <option value="Rejected" <%= currentFilter === 'Rejected' ? 'selected' : '' %>>Rejected</option>
-    </select>
-    <button type="submit">Apply Filter</button>
-</form>
+            <div class="column m-3">
+                <div class="field">
+                    <label class="label">Booking Status</label>
+                    <div class="control">
+                        <div class="select is-fullwidth"> 
+                            <select name="status">
+                                <option value="Pending" <%= currentFilter === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                <option value="Confirmed" <%= currentFilter === 'Confirmed' ? 'selected' : '' %>>Confirmed</option>
+                                <option value="Rejected" <%= currentFilter === 'Rejected' ? 'selected' : '' %>>Rejected</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-<h3><%= currentFilter %> Bookings:</h3>
+            <div class="column m-3">
+                <div class="field mt-5"> 
+                    <div class="control">
+                        <button class="button is-dark" type="submit">Apply</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+<p class="title is-3 mb-4 mt-5 ml-5"><%= currentFilter %> Bookings:</p>
+
 <% if (bookings.length === 0) { %>
-    <p>No <%= currentFilter %> bookings found.</p>
+    <div class="box m-3">
+        <p class="subtitle is-5 mb-2 mt-4 ml-2">No <%= currentFilter %> bookings found.</p>
+    </div>
 <% } else { %>
-     <ul>
         <% bookings.forEach(booking => { %>
-            <li>
-                <p>Client Name: <%= booking.client_name %></p>
-                <p>Client Email: <%= booking.client_email %></p>
-                <p>Service Name: <%= booking.service_name %></p>
-                <p>Service Description: <%= booking.service_description %></p>
-                <p>Client Description: <%= booking.client_description %></p>
-                <p>Job Date: <%= booking.job_date %></p>
-                <p>Job Start Time: <%= booking.job_start_time %></p>
-                <p>Price Type: <%= booking.price_type %></p>
-                <p>Base Price: <%= booking.base_price %></p>
-            </li>
+        <div class="box m-3">
+            <p class="subtitle is-5 mb-2 mt-3 ml-2">Client Name: <strong><%= booking.client_name %></strong></p>
+            <p class="subtitle is-5 mb-2 mt-3 ml-2">Client Email: <strong><%= booking.client_email %></strong></p>
+            <p class="subtitle is-5 mb-2 mt-3 ml-2">Service Name: <strong><%= booking.service_name %></strong></p>
+            <p class="subtitle is-5 mb-2 mt-3 ml-2">Service Description: <strong><%= booking.service_description %></strong></p>
+            <p class="subtitle is-5 mb-2 mt-3 ml-2">Client Description: <strong><%= booking.client_description %></strong></p>
+            <p class="subtitle is-5 mb-2 mt-3 ml-2">Job Date: <strong><%= booking.job_date %></strong></p>
+            <p class="subtitle is-5 mb-2 mt-3 ml-2">Job Start Time: <strong><%= booking.job_start_time %></strong></p>
+            <p class="subtitle is-5 mb-2 mt-3 ml-2">Price Type: <strong><%= booking.price_type %></strong></p>
+            <p class="subtitle is-5 mb-2 mt-3 ml-2">Base Price: <strong><%= booking.base_price %></strong></p>            
 
             <% if (currentFilter === 'Pending') { %>
-            <form action="/update-booking" method="POST">
-                <input type="hidden" name="bookingId" value="<%= booking.booking_id %>">
-                <input type="hidden" name="newStatus" value="Confirmed">
+            <div class="buttons is-grouped">
+                <form action="/update-booking" method="POST" onsubmit="return confirm('Are you sure you want to confirm the booking?')">
+                    <input type="hidden" name="bookingId" value="<%= booking.booking_id %>">
+                    <input type="hidden" name="newStatus" value="Confirmed">
 
-                <button type="submit">Confirm</button>
-            </form>
+                    <button class="button is-success mb-2 mt-3 ml-2" type="submit">Confirm</button>
+                </form>
 
-            <form action="/update-booking" method="POST">
-                <input type="hidden" name="bookingId" value="<%= booking.booking_id %>">
-                <input type="hidden" name="newStatus" value="Rejected">
+                <form action="/update-booking" method="POST" onsubmit="return confirm('Are you sure you want to reject the booking?')">
+                    <input type="hidden" name="bookingId" value="<%= booking.booking_id %>">
+                    <input type="hidden" name="newStatus" value="Rejected">
 
-                <button type="submit">Reject</button>
-            </form>
+                    <button class="button is-danger mb-2 mt-3 ml-2" type="submit">Reject</button>
+                </form>
+            </div>
             <% } %>
-            <br>
+        </div>
         <% }); %>
-    </ul>
  <% } %>

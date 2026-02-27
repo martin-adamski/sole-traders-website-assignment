@@ -1,42 +1,63 @@
 <%- include('partials/header') %>
 
-<hr>
-
 <% if (locals.message) { %>
     <p id="flash-msg" class="notification <%= message.type %> m-3 py-3">
         <%= message.text %>
     </p>
 <% } %>
 
-<h1>Edit Trader Availability</h1>
+<div class="box m-3">
+    <p class="title is-3 mb-4 mt-3 ml-2">Edit Availability</p>
+</div>
 
-<form action="/edit-availability" method="POST">
-    <input type="hidden" name="trader_id" value="<%= trader_id %>">
+<div class="box m-3">
+    <form action="/edit-availability" method="POST">
+        <input type="hidden" name="trader_id" value="<%= trader_id %>">
 
-    <% const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']; %>
+        <% const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']; %>
 
-    <% daysOfWeek.forEach(day => { %>
-        <% const displayDay = day.charAt(0).toUpperCase() + day.slice(1); %>
+        <% daysOfWeek.forEach(day => { %>
+            <div class="box">
+            <% const displayDay = day.charAt(0).toUpperCase() + day.slice(1); %>
         
-        <div>
-            <label><%= displayDay %></label>
-            
-            <label for="<%= day %>1">Start Time:</label>
-            <input type="time" name="<%= day %>1" id="<%= day %>1" value="<%= days[day].start_time %>" required>
-            
-            <label for="<%= day %>2">End Time:</label>
-            <input type="time" name="<%= day %>2" id="<%= day %>2" value="<%= days[day].end_time %>" required>
-            
-            <label for="<%= day %>3">Active:</label>
-            <select name="<%= day %>3" id="<%= day %>3" required>
-                <option value="Yes" <%= days[day].selected === 'Yes' ? 'selected' : '' %>>Yes</option>
-                <option value="No" <%= days[day].selected === 'No' ? 'selected' : '' %>>No</option>
-            </select>
-        </div>
-    <% }) %>
+            <div class="field is-horizontal is-vcentered">
+                <div class="field-label is-normal" style="flex-grow: 1; text-align: left;">
+                    <label class="label"><%= displayDay %></label>
+                </div>
 
-    <button type="submit">Save Availability</button>
+                <div class="field-body">
+                    <div class="field">
+                        <p class="control is-expanded">
+                            <label class="label is-small" for="<%= day %>1">Start Time</label>
+                            <input class="input" type="time" name="<%= day %>1" id="<%= day %>1" value="<%= days[day].start_time %>" required>
+                        </p>
+                    </div>
 
-</form>
+                    <div class="field">
+                        <p class="control is-expanded">
+                            <label class="label is-small" for="<%= day %>2">End Time</label>
+                            <input class="input" type="time" name="<%= day %>2" id="<%= day %>2" value="<%= days[day].end_time %>" required>
+                        </p>
+                    </div>
+
+                    <div class="field">
+                        <p class="control">
+                            <label class="label is-small" for="<%= day %>3">Active</label>
+                            <span class="select is-fullwidth">
+                                <select name="<%= day %>3" id="<%= day %>3" required>
+                                    <option value="Yes" <%= days[day].selected === 'Yes' ? 'selected' : '' %>>Yes</option>
+                                    <option value="No" <%= days[day].selected === 'No' ? 'selected' : '' %>>No</option>
+                                </select>
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            </div>
+        <% }) %>
+        
+        <button class="button is-dark mb-2 mt-3 ml-2" type="submit">Save Availability</button>
+    </form>
+</div>
 
 <%- include('partials/footer') %>

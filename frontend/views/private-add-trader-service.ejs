@@ -1,45 +1,53 @@
 <%- include('partials/header') %>
 
-<hr>
-
 <% if (locals.message) { %>
     <p id="flash-msg" class="notification <%= message.type %> m-3 py-3">
         <%= message.text %>
     </p>
 <% } %>
 
-<h1>Add Service</h1>
-
-<form action="/add-service" method="POST">
-
-    <input type="hidden" name="trader_id" value="<%= traderId %>">
-
-    <div>
-        <label for="stitle">Title:</label>
-        <input type="text" name="title" id="stitle" required>
-    </div>
-
-    <div>
-        <label for="sdescription">Description:</label>
-        <textarea name="description" id="sdescription" rows="4" required></textarea>
-    </div>
+<div class="box m-3">
+    <p class="title is-3 mb-4 mt-3 ml-2">Add Service</p>
     
-    <div>
-        <label for="sbase_price">Base Price:</label>
-        <input type="number" name="base_price" id="sbase_price" step="0.01" required>
-    </div>
+    <form action="/add-service" method="POST">
+        <input type="hidden" name="trader_id" value="<%= traderId %>">
+        
+        <div class="field mb-2 mt-1 ml-2">
+            <label class="label" for="stitle">Title:</label>
+            <div class="control">
+                <input class="input" type="text" name="title" id="stitle" required>
+            </div>
+        </div>
+
+       <div class="field mb-2 mt-1 ml-2">
+            <label class="label" for="sdescription">Description:</label>
+            <div class="control">
+                <textarea class="textarea" name="description" id="sdescription" rows="3" required></textarea>
+            </div>
+        </div>
     
-    <div>
-        <label for="sprice_type">Booking Status</label>
-        <select name="price_type" id="sprice_type" required>
-            <option value="Fixed" selected>Fixed</option>
-            <option value="Hourly">Hourly</option>
-        </select>
-    </div>
+        <div class="field mb-2 mt-1 ml-2">
+            <label class="label" for="sbase_price">Base Price:</label>
+            <div class="control">
+                <input class="input" type="number" name="base_price" id="sbase_price" step="0.01" required>
+            </div>
+        </div>
+    
+        <div class="field mb-2 mt-1 ml-2">
+            <label class="label" for="sprice_type">Price Type:</label>
+            <div class="control">
+                <div class="select">
+                    <select name="price_type" id="sprice_type" required>
+                        <option value="Fixed" selected>Fixed</option>
+                        <option value="Hourly">Hourly</option>
+                    </select>
+                </div>
+            </div>
+        </div>
 
-    <button type="submit">Confirm</button>
-</form>
-
-<a href="/view-services/">Cancel</a>
+        <button class="button is-dark mb-2 mt-4 ml-2" type="submit">Confirm</button>
+        <a class="button is-link mb-2 mt-4 ml-2" href="/view-services/">Cancel</a>
+    </form>
+</div>
 
 <%- include('partials/footer') %>

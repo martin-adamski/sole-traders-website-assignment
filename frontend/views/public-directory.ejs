@@ -13,7 +13,8 @@
                 <div class="field">
                     <label class="label">Trade Type</label>
                     <div class="control">
-                        <div class="select is-fullwidth"> <select name="tradeTypeChoice">
+                        <div class="select is-fullwidth"> 
+                            <select name="tradeTypeChoice">
                                 <% types.forEach( type => { %>
                                     <option value="<%= type %>" <%= currentFilter.type === type ? 'selected' : '' %>>
                                         <%= type %>
@@ -45,10 +46,10 @@
             <div class="column is-one-quarter m-3">
                 <div class="field is-grouped mt-5"> 
                     <div class="control">
-                        <button class="button is-dark" type="submit">Apply</button>
+                        <button class="button is-dark" type="submit">Apply Filter</button>
                     </div>
                     <div class="control">
-                        <a href="/directory" class="button is-dark">Reset</a>
+                        <a href="/directory" class="button is-dark">Reset Filter</a>
                     </div>
                 </div>
             </div>
@@ -67,7 +68,6 @@
                 <a class="title has-text-link is-3 mb-4 mt-3 ml-2" href="/traders/<%= trader.user_id %>"><%= trader.full_name %></a>
                 <p class="subtitle is-5 mb-2 mt-4 ml-2"><%= trader.trade_type %> in <%= trader.region %></p>
                 <p class="subtitle is-6 mb-2 mt-2 ml-2">Average Rating: <%= trader.average_rating %></p>
-            <br>
             </div>
         <% }); %> 
 <% } %>
@@ -122,7 +122,7 @@
             });
         };
 
-        makeChart('monthlyChart', 'Bookings per Month', data.monthly, 'month', 'count', '#36A2EB');
+        makeChart('monthlyChart', 'Bookings per Month', data.monthly, 'month_name', 'count', '#36A2EB');
         makeChart('popularityChart', 'Bookings by Trade', data.popularity, 'trade_type', 'count', '#4BC0C0');
 
     } catch (err) {

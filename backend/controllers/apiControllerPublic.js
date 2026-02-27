@@ -1,6 +1,6 @@
 const db = require('../config/dbconnection');
 const bcrypt = require('bcrypt');
-const { validateBooking } = require('../utils/validation');
+const { validateRegistration, validateBooking } = require('../utils/validation');
 
 // Hardcoded consts variables to use for directory filters
 const ALLOWED_TRADES = ['Plumber', 'Electrician', 'Carpenter', 'Builder', 'Gardener'];
@@ -48,12 +48,28 @@ exports.getAllTraders = async (req, res) => {
         // Bookings per month
         const monthlyQuery = `
         SELECT 
-        DATE_FORMAT(job_date, '%M') AS month
-        , COUNT(*) AS count
-        FROM bookings
+        custom_months.month_name
+        , custom_months.month_number
+        , COUNT(b.job_date) AS count
+        FROM (
+            SELECT 'January' AS month_name, 1 as month_number  UNION ALL
+            SELECT 'February', 2 UNION ALL
+            SELECT 'March', 3 UNION ALL
+            SELECT 'April', 4 UNION ALL
+            SELECT 'May', 5 UNION ALL
+            SELECT 'June', 6 UNION ALL
+            SELECT 'July', 7 UNION ALL
+            SELECT 'August', 8 UNION ALL
+            SELECT 'September', 9 UNION ALL
+            SELECT 'October', 10 UNION ALL
+            SELECT 'November', 11 UNION ALL
+            SELECT 'December', 12
+        ) AS custom_months
+        LEFT JOIN bookings b 
+            ON MONTHNAME(b.job_date) = custom_months.month_name
         GROUP BY 1
-        ORDER BY 2 DESC;
-        `;
+        ORDER BY 2;
+        `
         const [monthlyBookings] = await db.query(monthlyQuery);
 
         // Booking per trade type
