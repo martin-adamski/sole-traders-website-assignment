@@ -3,7 +3,7 @@
 <hr>
 
 <% if (locals.message) { %>
-    <p id="flash-msg" class="help <%= message.type %>" style="font-weight: bold; margin-bottom: 10px;">
+    <p id="flash-msg" class="notification <%= message.type %> m-3 py-3">
         <%= message.text %>
     </p>
 <% } %>

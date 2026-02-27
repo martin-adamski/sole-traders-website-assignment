@@ -64,9 +64,9 @@
 <% } else { %> 
         <% traders.forEach(trader => { %>
             <div class="box m-3">
-                    <a class="title has-text-link is-3 mb-4 mt-3 ml-2" href="/traders/<%= trader.user_id %>"><%= trader.full_name %></a>
-                    <p class="subtitle is-5 mb-2 mt-4 ml-2"><%= trader.trade_type %> in <%= trader.region %></p>
-                    <p class="subtitle is-6 mb-2 mt-2 ml-2">Average Rating: <%= trader.average_rating %></p>
+                <a class="title has-text-link is-3 mb-4 mt-3 ml-2" href="/traders/<%= trader.user_id %>"><%= trader.full_name %></a>
+                <p class="subtitle is-5 mb-2 mt-4 ml-2"><%= trader.trade_type %> in <%= trader.region %></p>
+                <p class="subtitle is-6 mb-2 mt-2 ml-2">Average Rating: <%= trader.average_rating %></p>
             <br>
             </div>
         <% }); %> 

@@ -1,55 +1,71 @@
 <%- include('partials/header') %>
 
-<h1>Request Booking</h1>
-<h2><%= service.title %> with <%= trader.name %></h2>
-<p>Price: £<%= service.base_price %></p>
-
-<hr>
-
 <% if (locals.successfulMessage) { %>
-    <p id="success-msg" class="help is-success" style="font-weight: bold; margin-bottom: 10px;">
+    <p id="success-msg" class="notification is-success m-3 py-3">
         <%= successfulMessage %>
     </p>
 <% } %>
 
 <% if (locals.errorMessage) { %>
-    <p id="error-msg" class="help is-danger" style="font-weight: bold; margin-bottom: 10px;">
+    <p id="error-msg" class="notification is-danger m-3 py-3">
         <%= errorMessage %>
     </p>
 <% } %>
 
-<form action="/services/<%= service.id %>/book" method="POST">
+<div class="box m-3">
+    <p class="title is-3 mb-4 mt-3 ml-2">Booking Request</p>
+    <p class="subtitle is-4 mb-2 mt-1 ml-2"><%= service.title %> with <%= trader.name %></p>
+    <p class="subtitle is-6 mb-2 mt-1 ml-2">Price: £<%= service.base_price %> - <%= service.price_type %></>
+</div>
+
+<hr>
+
+<div class="box m-3">
+
+    <form action="/services/<%= service.id %>/book" method="POST">
     <input type="hidden" name="trader_id" value="<%= trader.id %>">
     <input type="hidden" name="client_user_id" value="<%= user.id %>">
 
-    <div>
-        <label for="cname">Your Name:</label>
-        <input type="text" name="client_name" id="cname" value="<%= user.full_name %>" required>
+    <div class="field mb-2 mt-1 ml-2">
+        <label class="label" for="cname">Name:</label>
+        <div class="control">
+            <input class="input" type="text" name="client_name" id="cname" value="<%= user.full_name %>" required>
+        </div>
     </div>
 
-    <div>
-        <label for="cemail">Your Email:</label>
-        <input type="email" name="client_email" id="cemail" value="<%= user.email %>" required>
+    <div class="field mb-2 mt-1 ml-2">
+        <label class="label" for="cemail">Email:</label>
+        <div class="control">
+            <input class="input" type="email" name="client_email" id="cemail" value="<%= user.email %>" required>
+        </div>
     </div>
     
-    <div>
-        <label for="date">Date:</label>
-        <input type="date" name="job_date" id="date" min="2026-01-01" max="2028-01-01"required>
+    <div class="field mb-2 mt-1 ml-2">
+        <label class="label" for="date">Date:</label>
+        <div class="control">
+            <input class="input" type="date" name="job_date" id="date" min="2026-01-01" max="2028-01-01"required>
+        </div>
     </div>
     
-    <div>
-        <label for="start_time">Start Time:</label>
-        <input type="time" name="job_start_time" id="start_time" required>
+    <div class="field mb-2 mt-1 ml-2">
+        <label class="label" for="start_time">Start Time:</label>
+        <div class="control">
+            <input class="input" type="time" name="job_start_time" id="start_time" required>
+        </div>
     </div>
     
-    <div>
-        <label for="description">Job Description:</label>
-        <textarea name="job_description" rows="5" id="description" required></textarea>
+    <div class="field mb-2 mt-1 ml-2">
+        <label class="label" for="description">Job Description:</label>
+        <div class="control">
+            <textarea class="textarea" name="job_description" rows="3" id="description" required></textarea>
+        </div>
     </div>
 
-    <button type="submit">Confirm Booking</button> 
-    or <a href="/traders/<%= trader.id %>">Cancel</a>
+    <button class="button is-dark mb-2 mt-1 ml-2" type="submit">Confirm Booking</button> 
+    <a class="button is-link mb-2 mt-1 ml-2" href="/traders/<%= trader.id %>">Cancel</a>
 
 </form>
+
+</div>
 
 <%- include('partials/footer') %>

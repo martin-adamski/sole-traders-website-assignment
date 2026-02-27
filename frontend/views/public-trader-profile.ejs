@@ -1,55 +1,61 @@
 <%- include('partials/header') %>
 
-<a href="/directory">&larr; Back to Directory</a>
-
 <% if (locals.message) { %>
-    <p id="flash-msg" class="help <%= message.type %>" style="font-weight: bold; margin-bottom: 10px;">
+    <p id="flash-msg" class="notification <%= message.type %> m-3 py-3">
         <%= message.text %>
     </p>
 <% } %>
 
-<h1><%= trader.full_name %></h1>
-<p><strong><%= trader.trade_type %></strong> in <%= trader.region %></p>
+<div class="box m-3">
+    <a class="subtitle has-text-link is-6" href="/directory">&larr; Back to Directory</a>
 
-<p><%= trader.bio %></p>
-<p>Average Rating: <%= trader.average_rating %></p>
+    <p class="title is-3 mb-4 mt-3 ml-2"><%= trader.full_name %></p>
+    <p class="subtitle is-5 mb-2 mt-4 ml-2"><strong><%= trader.trade_type %></strong> in <%= trader.region %></p>
+    <p class="subtitle is-6 mb-2 mt-2 ml-2"><%= trader.bio %></p>
+    <p class="subtitle is-italic is-6 mb-2 mt-4 ml-2">Average Rating: <%= trader.average_rating %></p>
+</div>
 
-<form action="/submit-rating" method="POST">
+<div class="box m-3">
+
+    <form action="/submit-rating" method="POST">
     <input type="hidden" name="traderId" value="<%= traderId %>">
 
-    <div>
-        <label for="rating">Rate Trader:</label>
-            <select name="rating" id="rating" required>
-            <option value="5">5</option>
-            <option value="4">4</option>
-            <option value="3">3</option>
-            <option value="2">2</option>
-            <option value="1">1</option>
-        </select>
+    <div class="field">
+        <label class="label mb-2 mt-4 ml-2" for="rating">Rate Trader:</label>
+            <div class="control">
+                <div class="select is-fullwidth mb-2 ml-2">
+                    <select name="rating" id="rating" required>
+                        <option value="5">5</option>
+                        <option value="4">4</option>
+                        <option value="3">3</option>
+                        <option value="2">2</option>
+                        <option value="1">1</option>
+                    </select>
+                </div>
+            </div>
     </div>
     
-    <button type="submit">Submit</button>
+    <button class="button is-dark mb-2 mt-1 ml-2" type="submit">Submit</button>
 </form>
+
+</div>
 
 <hr>
 
-<h2>Services</h2>
-
 <% if (services.length === 0) { %>
-    <p>No services listed.</p>
+    <div class="box m-3">
+        <p class="subtitle is-5 mb-2 mt-4 ml-2">No services listed.</p>
+    </div>
 <% } else { %>
-    <ul>
-        <% services.forEach(service => { %>
-            <li>
-                <h3><%= service.title %> (£<%= service.base_price %>)</h3>
-                <p><%= service.description %></p>
-                <% if (user.role !== 'Trader') { %>
-                    <a href="/services/<%= service.id %>/book">Book this service</a>
-                <% } %>
-            </li>
-            <br>
-        <% }); %>
-    </ul>
+    <% services.forEach(service => { %>
+        <div class="box m-3">
+            <p class="title is-4 mb-2 mt-2 ml-2"><%= service.title %> (£<%= service.base_price %> - <%= service.price_type %>)</p>
+            <p class="subtitle is-5 mb-2 mt-2 ml-2"><%= service.description %></p>
+            <% if (user.role !== 'Trader') { %>
+                <a class="button is-link mb-2 mt-3 ml-2" href="/services/<%= service.id %>/book">Book Service</a>
+            <% } %>
+        </div>
+    <% }); %>
 <% } %>
 
 <%- include('partials/footer') %>

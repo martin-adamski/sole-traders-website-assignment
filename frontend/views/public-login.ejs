@@ -1,13 +1,13 @@
 <%- include('partials/header') %>
 
 <% if (locals.message) { %>
-    <p id="flash-msg" class="notification <%= message.type %> py-3">
+    <p id="flash-msg" class="notification <%= message.type %> m-3 py-3">
         <%= message.text %>
     </p>
 <% } %>
 
 <% if (locals.errorMessage) { %>
-    <p id="error-msg" class="notification is-danger py-3">
+    <p id="error-msg" class="notification is-danger m-3 py-3">
         <%= errorMessage %>
     </p>
 <% } %>
