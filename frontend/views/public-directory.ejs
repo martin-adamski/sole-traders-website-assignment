@@ -1,47 +1,75 @@
 <%- include('partials/header') %>
 
-<h1><%= title %></h1>
-<p><%= traders.length %> active traders</p>
+<div class="box m-3">
+    <form action="/directory" method="GET">
+        <div class="columns is-vcentered"> 
+            
+            <div class="column is-one-quarter m-3">
+                <p class="title is-3"><%= title %></p>
+                <p class="subtitle is-6"><%= traders.length %> active traders</p>
+            </div>
 
-<form action="/directory" method="GET">
-    <label>Trade Type</label>
-    <select name="tradeTypeChoice">
-        <% types.forEach( type => { %>
-            <option value="<%= type %>" <%= currentFilter.type === type ? 'selected' : '' %>>
-                <%= type %>
-            </option>
-        <% }) %>
-    </select>
+            <div class="column is-one-quarter m-3">
+                <div class="field">
+                    <label class="label">Trade Type</label>
+                    <div class="control">
+                        <div class="select is-fullwidth"> <select name="tradeTypeChoice">
+                                <% types.forEach( type => { %>
+                                    <option value="<%= type %>" <%= currentFilter.type === type ? 'selected' : '' %>>
+                                        <%= type %>
+                                    </option>
+                                <% }) %>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <label>Region</label>
-    <select name="regionChoice">
-        <% regions.forEach( region => { %>
-            <option value="<%= region %>" <%= currentFilter.region === region ? 'selected' : '' %>>
-                <%= region %>
-            </option>
-         <% }) %>
-    </select>
+            <div class="column is-one-quarter m-2">
+                <div class="field">
+                    <label class="label">Region</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select name="regionChoice">
+                                <% regions.forEach( region => { %>
+                                    <option value="<%= region %>" <%= currentFilter.region === region ? 'selected' : '' %>>
+                                        <%= region %>
+                                    </option>
+                                <% }) %>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <button type="submit">Apply Filters</button>
-</form>
+            <div class="column is-one-quarter m-3">
+                <div class="field is-grouped mt-5"> 
+                    <div class="control">
+                        <button class="button is-dark" type="submit">Apply</button>
+                    </div>
+                    <div class="control">
+                        <a href="/directory" class="button is-dark">Reset</a>
+                    </div>
+                </div>
+            </div>
 
-<form action="/directory" method="GET">
-    <button type="submit">Reset Filters</button>
-</form>
+        </div>
+    </form>
+</div>
 
 <% if (traders.length === 0) { %>
-    <p>No traders found.</p>
-<% } else { %>
-    <ul>
+    <div class="box m-3">
+        <p class="title is-3 mb-4 mt-3 ml-2">No traders found.</p>
+    </div>
+<% } else { %> 
         <% traders.forEach(trader => { %>
-            <li>
-                <h3><a href="/traders/<%= trader.user_id %>"><%= trader.full_name %></a></h3>
-                <p><%= trader.trade_type %> in <%= trader.region %></p>
-                <p>Average Rating: <%= trader.average_rating %></p>
-            </li>
+            <div class="box m-3">
+                    <a class="title has-text-link is-3 mb-4 mt-3 ml-2" href="/traders/<%= trader.user_id %>"><%= trader.full_name %></a>
+                    <p class="subtitle is-5 mb-2 mt-4 ml-2"><%= trader.trade_type %> in <%= trader.region %></p>
+                    <p class="subtitle is-6 mb-2 mt-2 ml-2">Average Rating: <%= trader.average_rating %></p>
             <br>
-        <% }); %>
-    </ul>
+            </div>
+        <% }); %> 
 <% } %>
 
 <hr>
@@ -55,12 +83,14 @@
     }
 </script>
 
-<div class="columns is-desktop mb-5">
-    <div class="column is-half">
-        <canvas id="monthlyChart"></canvas>
-    </div>
-    <div class="column is-half">
-        <canvas id="popularityChart"></canvas>
+<div class="box m-3">
+    <div class="columns is-desktop m-3">
+        <div class="column is-half">
+            <canvas id="monthlyChart"></canvas>
+        </div>
+        <div class="column is-half m-3">
+            <canvas id="popularityChart"></canvas>
+        </div>
     </div>
 </div>
 

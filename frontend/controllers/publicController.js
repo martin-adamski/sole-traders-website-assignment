@@ -213,7 +213,7 @@ exports.postLogin = async (req, res) => {
             full_name: user.full_name,
             email: user.email,
         }
-        res.redirect('/');
+        res.redirect('/dashboard');
     } catch (err) {
         if (err.response) {
             const status = err.response.status;
