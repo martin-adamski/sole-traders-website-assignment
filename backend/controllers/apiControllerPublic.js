@@ -3,8 +3,8 @@ const bcrypt = require('bcrypt');
 const { validateRegistration, validateBooking } = require('../utils/validation');
 
 // Hardcoded consts variables to use for directory filters
-const ALLOWED_TRADES = ['Plumber', 'Electrician', 'Carpenter', 'Builder', 'Gardener'];
-const ALLOWED_REGIONS = ['London', 'Cardiff', 'Manchester', 'Birmingham', 'Leeds'];
+const ALLOWED_TRADES = ['All', 'Plumber', 'Electrician', 'Carpenter', 'Builder', 'Gardener'];
+const ALLOWED_REGIONS = ['All', 'London', 'Cardiff', 'Manchester', 'Birmingham', 'Leeds'];
 
 // Get all traders
 exports.getAllTraders = async (req, res) => {
