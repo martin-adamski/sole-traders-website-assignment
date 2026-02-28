@@ -48,9 +48,9 @@ exports.getAllTraders = async (req, res) => {
         // Bookings per month
         const monthlyQuery = `
         SELECT 
-        custom_months.month_name
+	    custom_months.month_name
         , custom_months.month_number
-        , COUNT(b.job_date) AS count
+        , IFNULL(bb.count, 0) as count
         FROM (
             SELECT 'January' AS month_name, 1 as month_number  UNION ALL
             SELECT 'February', 2 UNION ALL
@@ -65,12 +65,24 @@ exports.getAllTraders = async (req, res) => {
             SELECT 'November', 11 UNION ALL
             SELECT 'December', 12
         ) AS custom_months
-        LEFT JOIN bookings b 
-            ON MONTHNAME(b.job_date) = custom_months.month_name
+        LEFT JOIN (
+            SELECT 
+            MONTHNAME(b.job_date) as month_name
+            , COUNT(*) as count
+            FROM bookings b 
+            INNER JOIN services s
+                ON s.id = b.service_id
+            INNER JOIN trader_profiles tp
+                ON tp.user_id = s.trader_user_id
+                AND (tp.trade_type = ? OR ? = 'All' OR ? IS NULL)
+                AND (tp.region = ? OR ? = 'All' OR ? IS NULL)
+            GROUP BY 1
+        ) bb 
+            ON bb.month_name = custom_months.month_name
         GROUP BY 1
         ORDER BY 2;
         `
-        const [monthlyBookings] = await db.query(monthlyQuery);
+        const [monthlyBookings] = await db.query(monthlyQuery, [type, type, type, region, region, region]);
 
         // Booking per trade type
         const popularityQuery = `
@@ -80,10 +92,12 @@ exports.getAllTraders = async (req, res) => {
             ON b.service_id = s.id
         INNER JOIN trader_profiles tp 
             ON s.trader_user_id = tp.user_id
+            AND (tp.trade_type = ? OR ? = 'All' OR ? IS NULL)
+            AND (tp.region = ? OR ? = 'All' OR ? IS NULL)
         GROUP BY 1
         ORDER BY 2 DESC
         `;
-        const [tradePopularity] = await db.query(popularityQuery);
+        const [tradePopularity] = await db.query(popularityQuery, [type, type, type, region, region, region]);
 
         return res.status(200).json({
             status: 'success',
