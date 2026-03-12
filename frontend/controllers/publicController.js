@@ -93,7 +93,7 @@ exports.getBookingPage = async (req, res) => {
 };
 
 // Create booking / send to database
-exports.createBooking = async (req, res) => {
+exports.postCreateBooking = async (req, res) => {
     
     try {
         const serviceId = req.params.id;
@@ -269,11 +269,3 @@ exports.postSubmitRating = async (req, res) => {
         res.status(500).send('Server Error.');
     }
 };
-
-
-// // get error page
-// exports.get404Page = (req, res) => {
-//     res.status(404).render('errorPageCatchAll', { 
-//         title: 'Page Not Found' 
-//     });
-// };

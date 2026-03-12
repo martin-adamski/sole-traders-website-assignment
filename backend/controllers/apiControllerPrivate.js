@@ -23,12 +23,20 @@ exports.postRegisterPage = async (req, res) => {
 
         await db.query(query, [username, useremail, userfullname, hashedPassword, userrole])
 
-        return res.status(200).json({
+        return res.status(201).json({
             status: 'success',
             message: 'Registration successful'
         });
 
     } catch (err) {
+
+        if (err.errno === 1062) {
+            return res.status(400).json({
+            status: 'error',
+            message: 'The email or username provided already exists.'
+            });
+        }
+
         console.error("API Error: ", err);
         return res.status(500).json({
             status: 'error',
@@ -152,7 +160,7 @@ exports.postEditProfilePage = async (req, res) => {
         const { trader_id, trade_type, city, bio, availability } = req.body;
 
         if (!trader_id) {
-            return res.status(401).json({
+            return res.status(400).json({
                 status: 'failure',
                 message: 'Trader ID is required'
             });
@@ -201,7 +209,7 @@ exports.getViewProfilePage = async (req, res) => {
         const [rows] = await db.query(query, [traderId]);
             
         if (rows.length === 0) {
-            return res.status(401).json({
+            return res.status(404).json({
                 status: 'failure',
                 message: 'User not found'
             });
@@ -229,7 +237,7 @@ exports.getViewTraderBookingsPage = async (req, res) => {
         const queryStatus = req.query.status;
 
         if (!traderId) {
-            return res.status(401).json({
+            return res.status(400).json({
                 status: 'failure',
                 message: 'Trader ID is required'
             });
@@ -285,7 +293,7 @@ exports.patchBookingStatus = async(req, res) => {
         const { newStatus } = req.body;
 
         if (!bookingId) {
-            return res.status(401).json({
+            return res.status(400).json({
                 status: 'failure',
                 message: 'Booking ID is required'
             });
@@ -318,7 +326,7 @@ exports.getViewTraderServices = async (req, res) => {
         const traderId = req.params.id;
 
         if (!traderId) {
-            return res.status(401).json({
+            return res.status(400).json({
                 status: 'failure',
                 message: 'Trader ID is required'
             });
@@ -331,13 +339,6 @@ exports.getViewTraderServices = async (req, res) => {
         `;
         
         const [rows] = await db.query(query, [traderId]);
-
-        if (rows.length === 0) {
-            return res.status(401).json({
-                stauts: 'failure',
-                message: 'User not found'
-            });
-        };
         
         return res.status(200).json({
             status: 'success',
@@ -363,14 +364,14 @@ exports.getEditTraderService = async (req, res) => {
             const traderId = req.query.traderId;
 
         if (!serviceId) {
-            return res.status(401).json({
+            return res.status(400).json({
                 status: 'failure',
                 message: 'Service ID is required'
             });
         };
 
         if (!traderId) {
-            return res.status(401).json({
+            return res.status(400).json({
                 status: 'failure',
                 message: 'Trader ID is required'
             });
@@ -481,7 +482,7 @@ exports.postAddTraderService = async (req, res) => {
 
         await db.query(query, [traderId, title, description, base_price, price_type]);
     
-        return res.status(200).json({
+        return res.status(201).json({
             status: 'success',
             message: 'Service added successfully'
         });
@@ -504,14 +505,14 @@ exports.deleteDeleteTraderService = async (req, res) => {
         const traderId = req.body.traderId;
 
         if (!serviceId) {
-            return res.status(401).json({
+            return res.status(400).json({
                 status: 'failure',
                 message: 'Service ID is required'
             });
         };
 
         if (!traderId) {
-            return res.status(401).json({
+            return res.status(400).json({
                 status: 'failure',
                 message: 'Trader ID is required'
             });
@@ -544,7 +545,7 @@ exports.getEditTraderAvailability = async (req, res) => {
         const traderId = req.params.id;
 
         if (!traderId) {
-            return res.status(401).json({
+            return res.status(400).json({
                 status: 'failure',
                 message: 'Trader ID is required'
             });
@@ -597,7 +598,7 @@ exports.postEditTraderAvailability = async (req, res) => {
         const { availability } = req.body;
 
         if (!traderId) {
-            return res.status(401).json({
+            return res.status(400).json({
                 status: 'failure',
                 message: 'Trader ID is required'
             });

@@ -212,10 +212,11 @@ exports.getEditTraderService = async (req, res) => {
 // Post edit trader service
 exports.postEditTraderService = async (req, res) => {
 
+    const serviceId = req.params.id;
+
     try {
         const { title, description, base_price, price_type } = req.body;
         const traderId = req.session.user.id;
-        const serviceId = req.params.id;
         const endpoint = `http://localhost:3003/edit-service/${serviceId}`;
 
         const apiResponse = await apiClient.post(endpoint, { serviceId, traderId, title, description, base_price, price_type });

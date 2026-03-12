@@ -278,7 +278,7 @@ exports.postCreateBooking = async (req, res) => {
             });
         };
 
-        return res.status(200).json({
+        return res.status(201).json({
             status: 'success',
             message: 'Booking successful'
         });
@@ -305,7 +305,7 @@ exports.postSubmitRating = async (req, res) => {
 
         await db.query(query, [traderId, rating]);
 
-        return res.status(200).json({
+        return res.status(201).json({
             status: 'success',
             message: 'Rating submission successful'
         });
