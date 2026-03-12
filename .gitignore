@@ -16,3 +16,4 @@ build/
 # OS/IDE
 .DS_Store
 .vscode/
+sole_traders_db.sql
